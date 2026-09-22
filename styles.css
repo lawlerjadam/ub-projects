@@ -151,16 +151,16 @@ html, body {
 /* ── SIDEBAR ──────────────────────────────────────── */
 .sidebar {
   width: var(--sidebar-width);
-  background: var(--dark-800);
+  background: var(--ub-purple);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  border-right: 1px solid var(--dark-700);
+  border-right: none;
 }
 
 .sidebar-header {
   padding: 1.25rem 1rem 1rem;
-  border-bottom: 1px solid var(--dark-700);
+  border-bottom: 1px solid rgba(255,255,255,0.12);
 }
 
 .sidebar-logo {
@@ -200,7 +200,7 @@ html, body {
   gap: 0.625rem;
   padding: 0.5rem 0.75rem;
   border-radius: var(--radius);
-  color: var(--text-on-dark-muted);
+  color: rgba(255,255,255,0.65);
   text-decoration: none;
   font-size: 0.875rem;
   font-weight: 500;
@@ -209,13 +209,14 @@ html, body {
 }
 
 .nav-item:hover {
-  background: var(--dark-700);
-  color: var(--text-on-dark);
+  background: rgba(255,255,255,0.12);
+  color: #ffffff;
 }
 
 .nav-item.active {
-  background: var(--ub-purple);
-  color: #fff;
+  background: rgba(255,255,255,0.18);
+  color: #ffffff;
+  font-weight: 600;
 }
 
 .nav-icon {
@@ -226,8 +227,8 @@ html, body {
 
 .nav-badge {
   margin-left: auto;
-  background: rgba(255,255,255,0.12);
-  color: var(--text-on-dark-muted);
+  background: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.75);
   font-size: 0.6875rem;
   font-weight: 600;
   padding: 0.1em 0.5em;
@@ -243,7 +244,7 @@ html, body {
 
 .sidebar-footer {
   padding: 0.75rem 1rem;
-  border-top: 1px solid var(--dark-700);
+  border-top: 1px solid rgba(255,255,255,0.12);
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -273,7 +274,7 @@ html, body {
 
 .user-email {
   font-size: 0.75rem;
-  color: var(--text-on-dark-muted);
+  color: rgba(255,255,255,0.65);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -283,7 +284,7 @@ html, body {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--text-on-dark-muted);
+  color: rgba(255,255,255,0.5);
   padding: 0.25rem;
   border-radius: 4px;
   display: flex;
@@ -295,8 +296,8 @@ html, body {
 .btn-icon svg { width: 16px; height: 16px; }
 
 .btn-icon:hover {
-  color: var(--text-on-dark);
-  background: var(--dark-700);
+  color: #ffffff;
+  background: rgba(255,255,255,0.12);
 }
 
 /* ── MAIN ─────────────────────────────────────────── */
@@ -305,6 +306,15 @@ html, body {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+}
+
+/* Purple top accent bar */
+.main::before {
+  content: '';
+  display: block;
+  height: 4px;
+  background: linear-gradient(90deg, var(--ub-purple) 0%, var(--violet-300) 100%);
+  flex-shrink: 0;
 }
 
 /* ── SECTIONS ─────────────────────────────────────── */
