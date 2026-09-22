@@ -300,63 +300,20 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ── AUTH ───────────────────────────────────────────────
+// ── AUTH (bypassed — open access) ─────────────────────
 const authScreen = document.getElementById('auth-screen');
 const appEl      = document.getElementById('app');
 
-async function initAuth() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    onSignedIn(session.user);
-  }
-
-  sb.auth.onAuthStateChange((_event, session) => {
-    if (session) {
-      onSignedIn(session.user);
-    } else {
-      onSignedOut();
-    }
-  });
-}
-
-function onSignedIn(user) {
+function initAuth() {
+  // No login required — hide auth screen and boot straight into the app
   authScreen.classList.add('hidden');
   appEl.classList.remove('hidden');
-  document.getElementById('user-email').textContent = user.email;
-  document.getElementById('user-avatar').textContent = (user.email || 'U')[0].toUpperCase();
+  const avatarEl = document.getElementById('user-avatar');
+  const emailEl  = document.getElementById('user-email');
+  if (avatarEl) avatarEl.textContent = 'UB';
+  if (emailEl)  emailEl.textContent  = 'Underbelly';
   loadData();
 }
-
-function onSignedOut() {
-  appEl.classList.add('hidden');
-  authScreen.classList.remove('hidden');
-}
-
-document.getElementById('auth-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email    = document.getElementById('auth-email').value.trim();
-  const password = document.getElementById('auth-password').value;
-  const errEl    = document.getElementById('auth-error');
-  const btn      = document.getElementById('auth-submit');
-
-  errEl.classList.add('hidden');
-  btn.innerHTML = '<span class="spinner"></span>';
-  btn.disabled = true;
-
-  const { error } = await sb.auth.signInWithPassword({ email, password });
-
-  btn.textContent = 'Sign in';
-  btn.disabled = false;
-
-  if (error) {
-    errEl.textContent = error.message;
-    errEl.classList.remove('hidden');
-  }
-});
-
-document.getElementById('sign-out-btn').addEventListener('click', async () => {
-  await sb.auth.signOut();
-});
 
 // ── DATA LOADING ───────────────────────────────────────
 // Tries Supabase tables; falls back to seed data if tables don't exist yet
