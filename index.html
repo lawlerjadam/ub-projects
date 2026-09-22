@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UB Projects</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════
+       AUTH SCREEN
+  ═══════════════════════════════════════════ -->
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <span class="auth-logo-mark">UB</span>
+        <span class="auth-logo-text">Projects</span>
+      </div>
+      <p class="auth-subtitle">Underbelly Production Management</p>
+      <form id="auth-form" class="auth-form" novalidate>
+        <div class="field-group">
+          <label for="auth-email">Email</label>
+          <input type="email" id="auth-email" placeholder="you@underbelly.co.uk" autocomplete="email" required />
+        </div>
+        <div class="field-group">
+          <label for="auth-password">Password</label>
+          <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password" required />
+        </div>
+        <div id="auth-error" class="auth-error hidden"></div>
+        <button type="submit" id="auth-submit" class="btn btn-primary btn-full">Sign in</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       APP SHELL (hidden until authed)
+  ═══════════════════════════════════════════ -->
+  <div id="app" class="app hidden">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <span class="sidebar-logo-mark">UB</span>
+          <span class="sidebar-logo-text">Projects</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-section="leads">
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          Leads
+          <span class="nav-badge" id="leads-count">0</span>
+        </a>
+        <a href="#" class="nav-item" data-section="proposals">
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>
+          Proposals
+          <span class="nav-badge" id="proposals-count">0</span>
+        </a>
+        <a href="#" class="nav-item" data-section="clients">
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-1a4 4 0 00-3-3.87M4 18v-1a4 4 0 013-3.87"/></svg>
+          Clients
+          <span class="nav-badge" id="clients-count">0</span>
+        </a>
+        <a href="#" class="nav-item" data-section="projects">
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
+          Projects
+          <span class="nav-badge" id="projects-count">0</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">U</div>
+          <span class="user-email" id="user-email"></span>
+        </div>
+        <button class="btn-icon sign-out-btn" id="sign-out-btn" title="Sign out">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main">
+
+      <!-- ── LEADS ─────────────────────────────── -->
+      <section id="section-leads" class="section active">
+        <div class="section-header">
+          <div>
+            <h1 class="section-title">Leads</h1>
+            <p class="section-sub">Potential productions and events in pipeline</p>
+          </div>
+          <button class="btn btn-primary" id="new-lead-btn">+ New Lead</button>
+        </div>
+
+        <!-- Kanban board -->
+        <div class="kanban" id="leads-kanban">
+          <div class="kanban-col" data-stage="Enquiry">
+            <div class="kanban-col-header">
+              <span class="kanban-col-title">Enquiry</span>
+              <span class="kanban-col-count" id="count-Enquiry">0</span>
+            </div>
+            <div class="kanban-cards" id="col-Enquiry"></div>
+          </div>
+          <div class="kanban-col" data-stage="Proposal">
+            <div class="kanban-col-header">
+              <span class="kanban-col-title">Proposal</span>
+              <span class="kanban-col-count" id="count-Proposal">0</span>
+            </div>
+            <div class="kanban-cards" id="col-Proposal"></div>
+          </div>
+          <div class="kanban-col" data-stage="Negotiation">
+            <div class="kanban-col-header">
+              <span class="kanban-col-title">Negotiation</span>
+              <span class="kanban-col-count" id="count-Negotiation">0</span>
+            </div>
+            <div class="kanban-cards" id="col-Negotiation"></div>
+          </div>
+          <div class="kanban-col" data-stage="Confirmed">
+            <div class="kanban-col-header">
+              <span class="kanban-col-title">Confirmed</span>
+              <span class="kanban-col-count" id="count-Confirmed">0</span>
+            </div>
+            <div class="kanban-cards" id="col-Confirmed"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── PROPOSALS ──────────────────────────── -->
+      <section id="section-proposals" class="section">
+        <div class="section-header">
+          <div>
+            <h1 class="section-title">Proposals</h1>
+            <p class="section-sub">Formal proposals sent to partners and venues</p>
+          </div>
+          <button class="btn btn-primary" id="new-proposal-btn">+ New Proposal</button>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table" id="proposals-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Client</th>
+                <th>Linked Lead</th>
+                <th>Total Value</th>
+                <th>Status</th>
+                <th>Sent</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="proposals-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ── CLIENTS ────────────────────────────── -->
+      <section id="section-clients" class="section">
+        <div class="section-header">
+          <div>
+            <h1 class="section-title">Clients</h1>
+            <p class="section-sub">Companies and contacts — venues, co-producers, promoters, funders</p>
+          </div>
+          <button class="btn btn-primary" id="new-client-btn">+ New Client</button>
+        </div>
+        <div class="clients-layout">
+          <div class="companies-panel">
+            <div class="panel-search">
+              <input type="text" id="clients-search" placeholder="Search companies…" class="search-input" />
+            </div>
+            <ul class="company-list" id="company-list"></ul>
+          </div>
+          <div class="contacts-panel" id="contacts-panel">
+            <div class="contacts-header">
+              <span id="contacts-company-name" class="contacts-company-name">Select a company</span>
+              <button class="btn btn-sm btn-outline" id="new-contact-btn" style="display:none">+ Contact</button>
+            </div>
+            <div id="contacts-list" class="contacts-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── PROJECTS ───────────────────────────── -->
+      <section id="section-projects" class="section">
+        <div class="section-header">
+          <div>
+            <h1 class="section-title">Projects</h1>
+            <p class="section-sub">Confirmed productions and events</p>
+          </div>
+          <button class="btn btn-primary" id="new-project-btn">+ New Project</button>
+        </div>
+        <div class="projects-grid" id="projects-grid"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       MODALS
+  ═══════════════════════════════════════════ -->
+
+  <!-- Lead modal -->
+  <div id="lead-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="lead-modal-title">New Lead</h2>
+        <button class="modal-close" data-modal="lead-modal">×</button>
+      </div>
+      <form id="lead-form" class="modal-form" novalidate>
+        <input type="hidden" id="lead-id" />
+        <div class="form-row">
+          <div class="field-group">
+            <label for="lead-name">Show / Event Name *</label>
+            <input type="text" id="lead-name" placeholder="e.g. The Hanging Garden" required />
+          </div>
+          <div class="field-group">
+            <label for="lead-type">Type *</label>
+            <select id="lead-type" required>
+              <option value="">Select…</option>
+              <option>Theatre</option>
+              <option>Festival</option>
+              <option>Live Event</option>
+              <option>Cultural Experience</option>
+              <option>Tour</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field-group">
+            <label for="lead-venue">Venue / Location</label>
+            <input type="text" id="lead-venue" placeholder="e.g. Assembly Rooms, Edinburgh" />
+          </div>
+          <div class="field-group">
+            <label for="lead-contact">Contact Name</label>
+            <input type="text" id="lead-contact" placeholder="e.g. Sarah Mackenzie" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field-group field-group--narrow">
+            <label for="lead-currency">Currency</label>
+            <select id="lead-currency">
+              <option value="GBP">GBP £</option>
+              <option value="USD">USD $</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="lead-value">Est. Value</label>
+            <input type="number" id="lead-value" placeholder="0" min="0" />
+          </div>
+          <div class="field-group">
+            <label for="lead-stage">Stage *</label>
+            <select id="lead-stage" required>
+              <option value="">Select…</option>
+              <option>Enquiry</option>
+              <option>Proposal</option>
+              <option>Negotiation</option>
+              <option>Confirmed</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field-group">
+            <label for="lead-source">Source</label>
+            <input type="text" id="lead-source" placeholder="e.g. Arts Council referral, Edinburgh Festivals Office" />
+          </div>
+        </div>
+        <div class="field-group">
+          <label for="lead-notes">Notes</label>
+          <textarea id="lead-notes" rows="3" placeholder="Any additional context…"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" data-modal="lead-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Lead</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Proposal modal -->
+  <div id="proposal-modal" class="modal-overlay hidden">
+    <div class="modal modal--wide">
+      <div class="modal-header">
+        <h2 class="modal-title" id="proposal-modal-title">New Proposal</h2>
+        <button class="modal-close" data-modal="proposal-modal">×</button>
+      </div>
+      <form id="proposal-form" class="modal-form" novalidate>
+        <input type="hidden" id="proposal-id" />
+        <div class="form-row">
+          <div class="field-group">
+            <label for="proposal-title">Proposal Title *</label>
+            <input type="text" id="proposal-title" placeholder="e.g. General Management – The Hanging Garden" required />
+          </div>
+          <div class="field-group">
+            <label for="proposal-lead">Linked Lead</label>
+            <select id="proposal-lead">
+              <option value="">None</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field-group">
+            <label for="proposal-client">Client / Addressee</label>
+            <input type="text" id="proposal-client" placeholder="e.g. Traverse Theatre" />
+          </div>
+          <div class="field-group">
+            <label for="proposal-status">Status</label>
+            <select id="proposal-status">
+              <option>Draft</option>
+              <option>Sent</option>
+              <option>Under Review</option>
+              <option>Accepted</option>
+              <option>Declined</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-group">
+          <label for="proposal-intro">Introduction</label>
+          <textarea id="proposal-intro" rows="4" placeholder="Opening paragraph introducing Underbelly and the scope of engagement…"></textarea>
+        </div>
+
+        <!-- Phases / Fees -->
+        <div class="phases-section">
+          <div class="phases-header">
+            <label class="phases-label">Phases &amp; Fees</label>
+            <button type="button" class="btn btn-sm btn-outline" id="add-phase-btn">+ Add Phase</button>
+          </div>
+          <div id="phases-list" class="phases-list"></div>
+        </div>
+
+        <div class="field-group">
+          <label for="proposal-investment">Investment Page Notes</label>
+          <textarea id="proposal-investment" rows="3" placeholder="e.g. All fees are subject to VAT at the prevailing rate. Payment terms 30 days from invoice…"></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" data-modal="proposal-modal">Cancel</button>
+          <button type="button" class="btn btn-outline" id="proposal-preview-btn">Preview PDF</button>
+          <button type="submit" class="btn btn-primary">Save Proposal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Client / Company modal -->
+  <div id="client-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="client-modal-title">New Company</h2>
+        <button class="modal-close" data-modal="client-modal">×</button>
+      </div>
+      <form id="client-form" class="modal-form" novalidate>
+        <input type="hidden" id="client-id" />
+        <div class="form-row">
+          <div class="field-group">
+            <label for="client-name">Company Name *</label>
+            <input type="text" id="client-name" placeholder="e.g. Traverse Theatre" required />
+          </div>
+          <div class="field-group">
+            <label for="client-type">Type</label>
+            <select id="client-type">
+              <option value="">Select…</option>
+              <option>Venue</option>
+              <option>Co-producer</option>
+              <option>Promoter</option>
+              <option>Funder</option>
+              <option>Festival</option>
+              <option>Agency</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field-group">
+            <label for="client-city">City</label>
+            <input type="text" id="client-city" placeholder="e.g. Edinburgh" />
+          </div>
+          <div class="field-group">
+            <label for="client-country">Country</label>
+            <input type="text" id="client-country" placeholder="e.g. Scotland" value="UK" />
+          </div>
+        </div>
+        <div class="field-group">
+          <label for="client-website">Website</label>
+          <input type="url" id="client-website" placeholder="https://…" />
+        </div>
+        <div class="field-group">
+          <label for="client-notes">Notes</label>
+          <textarea id="client-notes" rows="2" placeholder="Any context about this company…"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" data-modal="client-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Company</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Contact modal -->
+  <div id="contact-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="contact-modal-title">New Contact</h2>
+        <button class="modal-close" data-modal="contact-modal">×</button>
+      </div>
+      <form id="contact-form" class="modal-form" novalidate>
+        <input type="hidden" id="contact-id" />
+        <input type="hidden" id="contact-company-id" />
+        <div class="form-row">
+          <div class="field-group">
+            <label for="contact-first">First Name *</label>
+            <input type="text" id="contact-first" placeholder="Sarah" required />
+          </div>
+          <div class="field-group">
+            <label for="contact-last">Last Name *</label>
+            <input type="text" id="contact-last" placeholder="Mackenzie" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field-group">
+            <label for="contact-role">Role / Title</label>
+            <input type="text" id="contact-role" placeholder="e.g. Executive Producer" />
+          </div>
+          <div class="field-group">
+            <label for="contact-email">Email</label>
+            <input type="email" id="contact-email" placeholder="sarah@traverse.co.uk" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field-group">
+            <label for="contact-phone">Phone</label>
+            <input type="tel" id="contact-phone" placeholder="+44 131 000 0000" />
+          </div>
+        </div>
+        <div class="field-group">
+          <label for="contact-notes">Notes</label>
+          <textarea id="contact-notes" rows="2" placeholder="Any context about this contact…"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" data-modal="contact-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Contact</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Project modal -->
+  <div id="project-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="project-modal-title">New Project</h2>
+        <button class="modal-close" data-modal="project-modal">×</button>
+      </div>
+      <form id="project-form" class="modal-form" novalidate>
+        <input type="hidden" id="project-id" />
+        <div class="form-row">
+          <div class="field-group">
+            <label for="project-name">Show / Event Name *</label>
+            <input type="text" id="project-name" placeholder="e.g. The Hanging Garden" required />
+          </div>
+          <div class="field-group">
+            <label for="project-type">Type *</label>
+            <select id="project-type" required>
+              <option value="">Select…</option>
+              <option>Theatre</option>
+              <option>Festival</option>
+              <option>Live Event</option>
+              <option>Cultural Experience</option>
+              <option>Tour</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field-group">
+            <label for="project-venue">Venue</label>
+            <input type="text" id="project-venue" placeholder="e.g. Underbelly, George Square" />
+          </div>
+          <div class="field-group">
+            <label for="project-status">Status *</label>
+            <select id="project-status" required>
+              <option value="">Select…</option>
+              <option>Development</option>
+              <option>Pre-Production</option>
+              <option>Active</option>
+              <option>Wrapped</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field-group">
+            <label for="project-start">Start Date</label>
+            <input type="date" id="project-start" />
+          </div>
+          <div class="field-group">
+            <label for="project-end">End Date</label>
+            <input type="date" id="project-end" />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" data-modal="project-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Project</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Project detail drawer -->
+  <div id="project-drawer" class="drawer-overlay hidden">
+    <div class="drawer">
+      <div class="drawer-header">
+        <div>
+          <h2 class="drawer-title" id="drawer-project-name"></h2>
+          <div class="drawer-meta" id="drawer-project-meta"></div>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="btn btn-sm btn-outline" id="drawer-edit-btn">Edit</button>
+          <button class="drawer-close" id="drawer-close-btn">×</button>
+        </div>
+      </div>
+
+      <div class="drawer-tabs">
+        <button class="drawer-tab active" data-tab="brief">Brief</button>
+        <button class="drawer-tab" data-tab="timeline">Timeline</button>
+        <button class="drawer-tab" data-tab="docs">Docs</button>
+      </div>
+
+      <div class="drawer-body">
+        <!-- Brief tab -->
+        <div class="drawer-tab-panel active" id="tab-brief">
+          <textarea id="brief-content" class="brief-textarea" placeholder="Add a project brief, scope of work, or key information…"></textarea>
+          <button class="btn btn-sm btn-primary" id="save-brief-btn" style="margin-top:0.75rem">Save Brief</button>
+        </div>
+
+        <!-- Timeline tab -->
+        <div class="drawer-tab-panel" id="tab-timeline">
+          <div class="timeline-actions">
+            <button class="btn btn-sm btn-outline" id="add-milestone-btn">+ Milestone</button>
+          </div>
+          <div id="timeline-list" class="timeline-list"></div>
+        </div>
+
+        <!-- Docs tab -->
+        <div class="drawer-tab-panel" id="tab-docs">
+          <div class="docs-actions">
+            <button class="btn btn-sm btn-outline" id="add-doc-btn">+ Add Doc</button>
+          </div>
+          <div id="docs-list" class="docs-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Milestone modal -->
+  <div id="milestone-modal" class="modal-overlay hidden">
+    <div class="modal modal--sm">
+      <div class="modal-header">
+        <h2 class="modal-title">Add Milestone</h2>
+        <button class="modal-close" data-modal="milestone-modal">×</button>
+      </div>
+      <form id="milestone-form" class="modal-form" novalidate>
+        <div class="field-group">
+          <label for="milestone-title">Milestone</label>
+          <input type="text" id="milestone-title" placeholder="e.g. First rehearsal day" required />
+        </div>
+        <div class="field-group">
+          <label for="milestone-date">Date</label>
+          <input type="date" id="milestone-date" required />
+        </div>
+        <div class="field-group">
+          <label for="milestone-notes">Notes</label>
+          <textarea id="milestone-notes" rows="2"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" data-modal="milestone-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Doc modal -->
+  <div id="doc-modal" class="modal-overlay hidden">
+    <div class="modal modal--sm">
+      <div class="modal-header">
+        <h2 class="modal-title">Add Document Link</h2>
+        <button class="modal-close" data-modal="doc-modal">×</button>
+      </div>
+      <form id="doc-form" class="modal-form" novalidate>
+        <div class="field-group">
+          <label for="doc-name">Document Name</label>
+          <input type="text" id="doc-name" placeholder="e.g. Production Agreement" required />
+        </div>
+        <div class="field-group">
+          <label for="doc-url">URL / Link</label>
+          <input type="url" id="doc-url" placeholder="https://drive.google.com/…" />
+        </div>
+        <div class="field-group">
+          <label for="doc-type">Type</label>
+          <select id="doc-type">
+            <option>Contract</option>
+            <option>Budget</option>
+            <option>Brief</option>
+            <option>Schedule</option>
+            <option>Rider</option>
+            <option>Invoice</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" data-modal="doc-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- PDF Preview modal -->
+  <div id="pdf-preview-modal" class="modal-overlay hidden">
+    <div class="modal modal--wide modal--tall">
+      <div class="modal-header">
+        <h2 class="modal-title">Proposal Preview</h2>
+        <button class="modal-close" data-modal="pdf-preview-modal">×</button>
+      </div>
+      <div id="pdf-preview-content" class="pdf-preview"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" data-modal="pdf-preview-modal">Close</button>
+        <button type="button" class="btn btn-primary" id="print-proposal-btn">Print / Save PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
