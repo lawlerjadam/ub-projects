@@ -18,6 +18,7 @@ let DB = {
   clients:   [],
   contacts:  [],
   projects:  [],
+  ideas:     [],
 };
 
 // Active context
@@ -393,6 +394,7 @@ function navigateTo(section) {
 
 // ── RENDER ALL ──────────────────────────────────────────
 function renderAll() {
+  renderIdeas();
   renderLeads();
   renderProposals();
   renderClients();
@@ -1123,3 +1125,161 @@ window.deleteDoc = async (id) => {
 
 // ── BOOT ───────────────────────────────────────────────
 initAuth();
+
+// ── IDEAS PARK ─────────────────────────────────────────
+
+const INSPIRE_IDEAS = [
+  { type: 'Festival', title: 'Fringe After Dark', desc: 'A late-night festival strand running midnight–3am across Edinburgh Fringe. Club nights, immersive performance and secret gigs in unexpected spaces.' },
+  { type: 'Live Event', title: 'Southbank Summer Spectacular', desc: 'A weekend takeover of the South Bank with free outdoor performance, food market and a headline ticketed show under the stars.' },
+  { type: 'Theatre', title: 'Site-Specific Scottish Tour', desc: 'A new play performed in non-traditional Scottish venues — distilleries, castles, community halls — touring 8 locations over 3 weeks.' },
+  { type: 'Cultural Experience', title: 'The Great British Circus Revival', desc: 'A touring big top celebrating the history of British circus. New acts, heritage archive, and a community skills programme at each stop.' },
+  { type: 'Festival', title: 'Edinburgh Eats & Beats', desc: 'A food and music festival running alongside the Edinburgh Fringe — local producers, guest chefs, and live music across three stages.' },
+  { type: 'Live Event', title: 'Rooftop Cinema Series', desc: 'Monthly rooftop film screenings in London with live score performances. Partner with a film composer to create original accompaniments.' },
+  { type: 'Tour', title: 'New Writing Road Trip', desc: 'A van tour of 15 UK towns with no existing theatre infrastructure. A small company, a new play, performed in pubs, libraries and car parks.' },
+  { type: 'Theatre', title: 'West End Lunchtime Theatre', desc: 'Short 45-minute lunchtime productions in a West End venue. New writing, affordable tickets, aimed at workers and tourists.' },
+  { type: 'Cultural Experience', title: 'Underground Edinburgh', desc: 'A walking experience through Edinburgh\'s hidden underground vaults — immersive theatre, storytelling and local history brought to life.' },
+  { type: 'Festival', title: 'UK Spoken Word Festival', desc: 'A national festival celebrating spoken word, poetry slam and storytelling. Touring 6 cities with a headline weekend in London.' },
+  { type: 'Live Event', title: 'The Underbelly Games Night', desc: 'A large-scale competitive games evening for 500+ people. Teams, prizes, giant versions of classic games, hosted by a comedian.' },
+  { type: 'Theatre', title: 'Immersive Panto', desc: 'A fully immersive pantomime where the audience moves between rooms following different storylines. Suitable for families and adults.' },
+];
+
+let inspireIndex = Math.floor(Math.random() * INSPIRE_IDEAS.length);
+
+function showInspireIdea() {
+  const idea = INSPIRE_IDEAS[inspireIndex % INSPIRE_IDEAS.length];
+  document.getElementById('inspire-tag').textContent = idea.type;
+  document.getElementById('inspire-title').textContent = idea.title;
+  document.getElementById('inspire-desc').textContent = idea.desc;
+}
+
+document.getElementById('inspire-btn').addEventListener('click', () => {
+  inspireIndex = Math.floor(Math.random() * INSPIRE_IDEAS.length);
+  showInspireIdea();
+  openModal('inspire-modal');
+});
+
+document.getElementById('inspire-skip-btn').addEventListener('click', () => {
+  inspireIndex++;
+  showInspireIdea();
+});
+
+document.getElementById('inspire-add-btn').addEventListener('click', () => {
+  const idea = INSPIRE_IDEAS[inspireIndex % INSPIRE_IDEAS.length];
+  const newIdea = {
+    id: uid(),
+    name: idea.title,
+    type: idea.type,
+    venue: '',
+    notes: idea.desc,
+    created_at: new Date().toISOString().slice(0, 10),
+    source: 'Inspired',
+  };
+  DB.ideas.push(newIdea);
+  closeModal('inspire-modal');
+  renderIdeas();
+  showToast('Idea added to Ideas Park 🐄');
+  document.querySelector('[data-section="ideas"]').click();
+});
+
+document.getElementById('new-idea-btn').addEventListener('click', () => {
+  document.getElementById('idea-modal-title').textContent = 'New Idea';
+  document.getElementById('idea-form').reset();
+  document.getElementById('idea-form').dataset.editId = '';
+  openModal('idea-modal');
+});
+
+document.getElementById('idea-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const editId = e.target.dataset.editId;
+  const record = {
+    id: editId || uid(),
+    name: document.getElementById('idea-name').value.trim(),
+    type: document.getElementById('idea-type').value,
+    venue: document.getElementById('idea-venue').value.trim(),
+    notes: document.getElementById('idea-notes').value.trim(),
+    created_at: new Date().toISOString().slice(0, 10),
+    source: 'Manual',
+  };
+  if (editId) {
+    const i = DB.ideas.findIndex(x => x.id === editId);
+    if (i > -1) DB.ideas[i] = record;
+  } else {
+    DB.ideas.push(record);
+  }
+  closeModal('idea-modal');
+  renderIdeas();
+  showToast(editId ? 'Idea updated' : 'Idea saved 🐄');
+});
+
+function renderIdeas() {
+  const grid = document.getElementById('ideas-grid');
+  const count = document.getElementById('ideas-count');
+  if (count) count.textContent = DB.ideas.length;
+
+  if (!DB.ideas.length) {
+    grid.innerHTML = `<div class="ideas-empty">
+      <div class="ideas-empty-icon">🐄</div>
+      <p>No ideas yet</p>
+      <span>Click <strong>Graze on an idea</strong> for inspiration, or add your own</span>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = DB.ideas.map(idea => `
+    <div class="idea-card" data-id="${idea.id}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        ${typeBadge(idea.type)}
+        <span style="font-size:0.75rem;color:var(--text-muted);">${formatDate(idea.created_at)}</span>
+      </div>
+      <div class="idea-card-title">${idea.name}</div>
+      ${idea.venue ? `<div class="idea-card-meta">📍 ${idea.venue}</div>` : ''}
+      ${idea.notes ? `<div class="idea-card-notes">${idea.notes}</div>` : ''}
+      <div class="idea-card-actions">
+        <button class="btn btn-outline btn-sm idea-to-lead" data-id="${idea.id}">→ Lead</button>
+        <button class="btn btn-outline btn-sm idea-to-project" data-id="${idea.id}">→ Project</button>
+        <button class="btn btn-ghost btn-sm idea-delete" data-id="${idea.id}" style="flex:0;">✕</button>
+      </div>
+    </div>
+  `).join('');
+
+  // Card action handlers
+  grid.querySelectorAll('.idea-to-lead').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idea = DB.ideas.find(x => x.id === btn.dataset.id);
+      if (!idea) return;
+      // Pre-fill lead modal
+      document.getElementById('lead-name').value = idea.name;
+      document.getElementById('lead-type').value = idea.type;
+      document.getElementById('lead-venue').value = idea.venue || '';
+      document.getElementById('lead-notes').value = idea.notes || '';
+      document.getElementById('lead-modal-title').textContent = 'Convert to Lead';
+      document.getElementById('lead-form').dataset.editId = '';
+      document.getElementById('lead-form').dataset.fromIdea = idea.id;
+      openModal('lead-modal');
+      document.querySelector('[data-section="leads"]').click();
+    });
+  });
+
+  grid.querySelectorAll('.idea-to-project').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idea = DB.ideas.find(x => x.id === btn.dataset.id);
+      if (!idea) return;
+      document.getElementById('project-name').value = idea.name;
+      document.getElementById('project-type').value = idea.type;
+      document.getElementById('project-venue').value = idea.venue || '';
+      document.getElementById('project-brief').value = idea.notes || '';
+      document.getElementById('project-modal-title').textContent = 'Convert to Project';
+      document.getElementById('project-form').dataset.editId = '';
+      openModal('project-modal');
+      document.querySelector('[data-section="projects"]').click();
+    });
+  });
+
+  grid.querySelectorAll('.idea-delete').forEach(btn => {
+    btn.addEventListener('click', () => {
+      DB.ideas = DB.ideas.filter(x => x.id !== btn.dataset.id);
+      renderIdeas();
+      showToast('Idea removed');
+    });
+  });
+}
