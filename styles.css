@@ -1819,11 +1819,11 @@ html, body {
   color: var(--text-muted);
 }
 
-.task-type-badge.type-meeting   { background: #ede9fe; color: #6d28d9; }
+.task-type-badge.type-meeting   { background: #ede9fe; color: #5b21b6; }
 .task-type-badge.type-follow-up { background: #dbeafe; color: #1d4ed8; }
-.task-type-badge.type-chase     { background: #fef3c7; color: #b45309; }
-.task-type-badge.type-call      { background: #dcfce7; color: #166534; }
-.task-type-badge.type-reminder  { background: #fce7f3; color: #9d174d; }
+.task-type-badge.type-chase     { background: #e0e7ff; color: #3730a3; }
+.task-type-badge.type-call      { background: #dbeafe; color: #1e40af; }
+.task-type-badge.type-reminder  { background: #ede9fe; color: #6d28d9; }
 
 .task-linked {
   font-size: 0.75rem;
