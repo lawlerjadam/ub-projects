@@ -615,10 +615,10 @@ html, body {
 }
 
 .badge-theatre  { background: var(--violet-100); color: var(--ub-purple); }
-.badge-festival { background: #FEF3CD; color: #856404; }
-.badge-live     { background: #D6EAF8; color: #1A5276; }
-.badge-cultural { background: #D4EDDA; color: #155724; }
-.badge-tour     { background: #FDECEA; color: #721C24; }
+.badge-festival { background: #ede9fe; color: #5b21b6; }
+.badge-live     { background: #dbeafe; color: #1e40af; }
+.badge-cultural { background: #e0e7ff; color: #3730a3; }
+.badge-tour     { background: #dbeafe; color: #1d4ed8; }
 .badge-default  { background: var(--border); color: var(--text-muted); }
 
 /* Status badges */
@@ -633,13 +633,13 @@ html, body {
 }
 
 .status-development    { background: var(--violet-100); color: var(--ub-purple); }
-.status-pre-production { background: #FEF3CD; color: #856404; }
-.status-active         { background: #D4EDDA; color: #155724; }
+.status-pre-production { background: #e0e7ff; color: #3730a3; }
+.status-active         { background: #dbeafe; color: #1e40af; }
 .status-wrapped        { background: var(--border); color: var(--text-muted); }
 .status-draft          { background: var(--border); color: var(--text-muted); }
 .status-sent           { background: var(--blue-light); color: var(--blue); }
-.status-under-review   { background: var(--amber-light); color: #856404; }
-.status-accepted       { background: var(--green-light); color: #155724; }
+.status-under-review   { background: #ede9fe; color: #6d28d9; }
+.status-accepted       { background: #dbeafe; color: #1d4ed8; }
 .status-declined       { background: var(--red-light); color: var(--red); }
 
 /* ── TABLE ────────────────────────────────────────── */
