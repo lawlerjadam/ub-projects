@@ -326,12 +326,16 @@ async function loadData() {
       { data: clients },
       { data: contacts },
       { data: projects },
+      { data: ideas },
+      { data: tasks },
     ] = await Promise.all([
       sb.from('leads').select('*').order('created_at', { ascending: false }),
       sb.from('proposals').select('*').order('created_at', { ascending: false }),
       sb.from('clients').select('*').order('name'),
       sb.from('contacts').select('*').order('last'),
       sb.from('projects').select('*').order('name'),
+      sb.from('ideas').select('*').order('created_at', { ascending: false }),
+      sb.from('tasks').select('*').order('created_at', { ascending: false }),
     ]);
 
     if (leads)     DB.leads     = leads;
@@ -339,8 +343,10 @@ async function loadData() {
     if (clients)   DB.clients   = clients;
     if (contacts)  DB.contacts  = contacts;
     if (projects)  DB.projects  = projects;
+    if (ideas)     DB.ideas     = ideas;
+    if (tasks)     DB.tasks     = tasks;
 
-    // Seed if empty
+    // Seed if empty (first run)
     if (!DB.leads.length)     DB.leads     = SEED.leads;
     if (!DB.proposals.length) DB.proposals = SEED.proposals;
     if (!DB.clients.length)   DB.clients   = SEED.clients;
@@ -1216,6 +1222,7 @@ document.getElementById('idea-form').addEventListener('submit', (e) => {
   } else {
     DB.ideas.push(record);
   }
+  persist('ideas', record);
   closeModal('idea-modal');
   renderIdeas();
   showToast(editId ? 'Idea updated' : 'Idea saved 🐄');
@@ -1287,7 +1294,9 @@ function renderIdeas() {
 
   grid.querySelectorAll('.idea-delete').forEach(btn => {
     btn.addEventListener('click', () => {
-      DB.ideas = DB.ideas.filter(x => x.id !== btn.dataset.id);
+      const ideaId = btn.dataset.id;
+      DB.ideas = DB.ideas.filter(x => x.id !== ideaId);
+      remove('ideas', ideaId);
       renderIdeas();
       showToast('Idea removed');
     });
