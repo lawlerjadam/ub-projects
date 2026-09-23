@@ -271,7 +271,7 @@ const formatDate = (iso) => {
   } catch { return iso; }
 };
 
-const probColor = (p) => p >= 75 ? '#22c55e' : p >= 50 ? '#f59e0b' : p >= 25 ? '#f97316' : '#94a3b8';
+const probColor = (p) => p >= 75 ? '#6d28d9' : p >= 50 ? '#7c3aed' : p >= 25 ? '#a78bfa' : '#c4b5fd';
 
 const typeBadge = (type) => {
   const map = {
@@ -491,7 +491,7 @@ function leadCardHTML(lead) {
       ${typeBadge(lead.type)}
       <div class="lead-card-footer">
         <span class="lead-card-value">${formatCurrency(lead.value, lead.currency)}</span>
-        ${lead.probability != null ? `<span class="lead-prob-badge" style="background:${probColor(lead.probability)}">${lead.probability}%</span>` : ''}
+        ${lead.probability != null ? `<span class="lead-prob-badge" style="background:${probColor(lead.probability)};color:${lead.probability >= 50 ? '#fff' : '#4c1d95'};margin-left:8px;">${lead.probability}%</span>` : ''}
         <div class="lead-card-actions">
           <button class="card-action-btn" onclick="editLead('${lead.id}'); event.stopPropagation();">Edit</button>
           <button class="card-action-btn convert" onclick="convertLeadToProposal('${lead.id}'); event.stopPropagation();" title="Convert to Proposal">→ Proposal</button>
@@ -2087,7 +2087,7 @@ window.openLeadDrawer = function(id) {
   document.getElementById('lead-drawer-name').textContent = lead.name;
   const probVal = lead.probability ?? null;
   const probPill = probVal != null
-    ? `<span style="background:${probColor(probVal)};color:#fff;border-radius:999px;padding:2px 8px;font-size:0.75rem;font-weight:600;">${probVal}% likely</span>`
+    ? `<span style="background:${probColor(probVal)};color:${probVal >= 50 ? '#fff' : '#4c1d95'};border-radius:999px;padding:2px 8px;font-size:0.75rem;font-weight:600;margin-left:4px;">${probVal}% likely</span>`
     : '';
   document.getElementById('lead-drawer-meta').innerHTML =
     `${typeBadge(lead.type)} ${probPill} <span style="color:var(--text-muted)">${lead.venue || ''}</span>`;
