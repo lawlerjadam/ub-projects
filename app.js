@@ -1316,3 +1316,380 @@ Object.entries(fabActions).forEach(([id, fn]) => {
     fn();
   });
 });
+
+
+// ══════════════════════════════════════════════════════
+// TASKS
+// ══════════════════════════════════════════════════════
+
+// Add tasks to the DB
+DB.tasks = [];
+
+// Seed tasks
+const SEED_TASKS = [
+  {
+    id: 'task-1',
+    title: 'Chase Barbican on Silk Road contract sign-off',
+    type: 'Chase',
+    due_date: new Date(Date.now() - 2 * 86400000).toISOString().slice(0, 10),
+    due_time: '',
+    linked_type: 'lead',
+    linked_id: 'lead-5',
+    status: 'Pending',
+    notes: 'GM agreement should have been signed by Oct 1. Follow up with Mei-Lin.',
+    created_at: new Date(Date.now() - 7 * 86400000).toISOString(),
+  },
+  {
+    id: 'task-2',
+    title: 'Meeting — Midnight Carnival programme review',
+    type: 'Meeting',
+    due_date: new Date().toISOString().slice(0, 10),
+    due_time: '14:00',
+    linked_type: 'project',
+    linked_id: 'proj-1',
+    status: 'Pending',
+    notes: 'Review headliner shortlist with Jamie. Edinburgh office.',
+    created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
+  },
+  {
+    id: 'task-3',
+    title: 'Follow up — Brighton Dome initial interest',
+    type: 'Follow-up',
+    due_date: new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10),
+    due_time: '',
+    linked_type: 'lead',
+    linked_id: 'lead-4',
+    status: 'Pending',
+    notes: 'Cressida mentioned decision in 2 weeks from 15 Sep.',
+    created_at: new Date(Date.now() - 5 * 86400000).toISOString(),
+  },
+  {
+    id: 'task-4',
+    title: 'Send Northern Stage tour budget draft',
+    type: 'Follow-up',
+    due_date: new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10),
+    due_time: '',
+    linked_type: 'lead',
+    linked_id: 'lead-6',
+    status: 'Pending',
+    notes: 'Patrick waiting on a rough budget before Levelling Up application.',
+    created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+  },
+  {
+    id: 'task-5',
+    title: 'Call — VAULT Festival 2028 internal review',
+    type: 'Call',
+    due_date: new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10),
+    due_time: '11:00',
+    linked_type: 'lead',
+    linked_id: 'lead-7',
+    status: 'Pending',
+    notes: 'Internal call before responding to Simone.',
+    created_at: new Date(Date.now() - 1 * 86400000).toISOString(),
+  },
+  {
+    id: 'task-6',
+    title: 'Reminder — Silk Road creative team contract deadline',
+    type: 'Reminder',
+    due_date: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
+    due_time: '',
+    linked_type: 'project',
+    linked_id: 'proj-2',
+    status: 'Pending',
+    notes: 'Deadline is 1 Nov per plan.',
+    created_at: new Date(Date.now() - 1 * 86400000).toISOString(),
+  },
+];
+
+// Init tasks from seed (only if empty)
+if (!DB.tasks.length) DB.tasks = JSON.parse(JSON.stringify(SEED_TASKS));
+
+// ── Active task filter ──
+let activeTaskFilter = 'all';
+
+// ── Date helpers ──
+function isToday(dateStr) {
+  if (!dateStr) return false;
+  return dateStr === new Date().toISOString().slice(0, 10);
+}
+
+function isOverdue(dateStr, status) {
+  if (!dateStr || status === 'Done') return false;
+  return dateStr < new Date().toISOString().slice(0, 10);
+}
+
+function taskDueLabel(task) {
+  const d = task.due_date;
+  if (!d) return '';
+  const today = new Date().toISOString().slice(0, 10);
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  if (d === today) return 'Today' + (task.due_time ? ' ' + task.due_time : '');
+  if (d === tomorrow) return 'Tomorrow' + (task.due_time ? ' ' + task.due_time : '');
+  return formatDate(d) + (task.due_time ? ' ' + task.due_time : '');
+}
+
+function linkedRecordName(task) {
+  if (!task.linked_type || !task.linked_id) return '';
+  const maps = {
+    lead:     { arr: DB.leads,     key: 'name' },
+    proposal: { arr: DB.proposals, key: 'title' },
+    client:   { arr: DB.clients,   key: 'name' },
+    project:  { arr: DB.projects,  key: 'name' },
+  };
+  const m = maps[task.linked_type];
+  if (!m) return '';
+  const rec = m.arr.find(r => r.id === task.linked_id);
+  return rec ? rec[m.key] : '';
+}
+
+function taskTypeBadgeClass(type) {
+  const map = {
+    'Meeting':   'type-meeting',
+    'Follow-up': 'type-follow-up',
+    'Chase':     'type-chase',
+    'Call':      'type-call',
+    'Reminder':  'type-reminder',
+  };
+  return map[type] || '';
+}
+
+// ── Render ──
+function renderTasks() {
+  const container = document.getElementById('tasks-list');
+  if (!container) return;
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  let tasks = DB.tasks.slice();
+
+  // Filter
+  if (activeTaskFilter === 'today') {
+    tasks = tasks.filter(t => t.due_date === today && t.status !== 'Done');
+  } else if (activeTaskFilter === 'overdue') {
+    tasks = tasks.filter(t => isOverdue(t.due_date, t.status));
+  }
+
+  // Sort: overdue first, then by date asc, done last
+  tasks.sort((a, b) => {
+    if (a.status === 'Done' && b.status !== 'Done') return 1;
+    if (b.status === 'Done' && a.status !== 'Done') return -1;
+    return (a.due_date || '').localeCompare(b.due_date || '');
+  });
+
+  if (!tasks.length) {
+    container.innerHTML = `<div class="tasks-empty"><div class="tasks-empty-icon">✓</div><p>${activeTaskFilter === 'overdue' ? 'No overdue tasks' : activeTaskFilter === 'today' ? 'Nothing due today' : 'No tasks yet'}</p></div>`;
+    return;
+  }
+
+  // Group into sections
+  const groups = [];
+  if (activeTaskFilter === 'all') {
+    const overdue   = tasks.filter(t => isOverdue(t.due_date, t.status));
+    const todayT    = tasks.filter(t => t.due_date === today && t.status !== 'Done');
+    const upcoming  = tasks.filter(t => t.due_date > today && t.status !== 'Done');
+    const done      = tasks.filter(t => t.status === 'Done');
+    if (overdue.length)  groups.push({ label: 'Overdue',  cls: 'overdue', items: overdue });
+    if (todayT.length)   groups.push({ label: 'Today',    cls: 'today',   items: todayT });
+    if (upcoming.length) groups.push({ label: 'Upcoming', cls: '',        items: upcoming });
+    if (done.length)     groups.push({ label: 'Done',     cls: '',        items: done });
+  } else {
+    groups.push({ label: activeTaskFilter === 'overdue' ? 'Overdue' : 'Today', cls: activeTaskFilter, items: tasks });
+  }
+
+  container.innerHTML = groups.map(group => `
+    <div class="tasks-group">
+      <div class="tasks-group-header">
+        <span class="tasks-group-title ${group.cls}">${group.label}</span>
+        <span class="tasks-group-count">${group.items.length}</span>
+      </div>
+      ${group.items.map(task => taskRowHTML(task)).join('')}
+    </div>
+  `).join('');
+
+  // Bind checkboxes
+  container.querySelectorAll('.task-checkbox').forEach(cb => {
+    cb.addEventListener('click', () => {
+      const id = cb.dataset.id;
+      const task = DB.tasks.find(t => t.id === id);
+      if (!task) return;
+      task.status = task.status === 'Done' ? 'Pending' : 'Done';
+      renderTasks();
+      updateTasksCount();
+      showToast(task.status === 'Done' ? 'Task marked done' : 'Task reopened');
+    });
+  });
+
+  // Bind edit buttons
+  container.querySelectorAll('.task-edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => openTaskModal(btn.dataset.id));
+  });
+
+  // Bind delete buttons
+  container.querySelectorAll('.task-delete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      DB.tasks = DB.tasks.filter(t => t.id !== btn.dataset.id);
+      renderTasks();
+      updateTasksCount();
+      showToast('Task deleted');
+    });
+  });
+}
+
+function taskRowHTML(task) {
+  const done    = task.status === 'Done';
+  const overdue = isOverdue(task.due_date, task.status);
+  const todayT  = isToday(task.due_date) && !done;
+  const linked  = linkedRecordName(task);
+  const dueLabel = taskDueLabel(task);
+
+  let rowCls = 'task-row';
+  if (done) rowCls += ' done';
+  else if (overdue) rowCls += ' overdue';
+
+  let dueCls = 'task-due';
+  if (overdue) dueCls += ' overdue';
+  else if (todayT) dueCls += ' today';
+
+  return `
+    <div class="${rowCls}" data-id="${task.id}">
+      <div class="task-checkbox ${done ? 'checked' : ''}" data-id="${task.id}" title="${done ? 'Reopen' : 'Mark done'}"></div>
+      <div class="task-body">
+        <div class="task-title">${task.title}</div>
+        <div class="task-meta">
+          <span class="task-type-badge ${taskTypeBadgeClass(task.type)}">${task.type}</span>
+          ${linked ? `<span class="task-linked">↳ ${linked}</span>` : ''}
+        </div>
+      </div>
+      <span class="${dueCls}">${dueLabel}</span>
+      <div class="task-actions">
+        <button class="task-action-btn task-edit-btn" data-id="${task.id}" title="Edit">Edit</button>
+        <button class="task-action-btn delete task-delete-btn" data-id="${task.id}" title="Delete">✕</button>
+      </div>
+    </div>
+  `;
+}
+
+function updateTasksCount() {
+  const pending = DB.tasks.filter(t => t.status !== 'Done').length;
+  const el = document.getElementById('tasks-count');
+  if (el) el.textContent = pending;
+}
+
+// ── Task filter buttons ──
+document.querySelectorAll('.tasks-filter').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeTaskFilter = btn.dataset.filter;
+    document.querySelectorAll('.tasks-filter').forEach(b => b.classList.toggle('active', b === btn));
+    renderTasks();
+  });
+});
+
+// ── Task modal ──
+let editingTaskId = null;
+
+function openTaskModal(taskId = null) {
+  editingTaskId = taskId;
+  const form = document.getElementById('task-form');
+  form.reset();
+
+  document.getElementById('task-modal-title').textContent = taskId ? 'Edit Task' : 'New Task';
+
+  // Populate linked-type dropdown handler
+  const linkedTypeEl = document.getElementById('task-linked-type');
+  const linkedIdGroup = document.getElementById('task-linked-id-group');
+  const linkedIdEl = document.getElementById('task-linked-id');
+
+  linkedTypeEl.onchange = () => {
+    const type = linkedTypeEl.value;
+    linkedIdGroup.style.display = type ? 'flex' : 'none';
+    if (type) {
+      const records = {
+        lead:     DB.leads.map(r => ({ id: r.id, name: r.name })),
+        proposal: DB.proposals.map(r => ({ id: r.id, name: r.title })),
+        client:   DB.clients.map(r => ({ id: r.id, name: r.name })),
+        project:  DB.projects.map(r => ({ id: r.id, name: r.name })),
+      }[type] || [];
+      linkedIdEl.innerHTML = records.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+    }
+  };
+
+  if (taskId) {
+    const task = DB.tasks.find(t => t.id === taskId);
+    if (task) {
+      document.getElementById('task-title').value    = task.title;
+      document.getElementById('task-type').value     = task.type;
+      document.getElementById('task-due-date').value = task.due_date;
+      document.getElementById('task-due-time').value = task.due_time || '';
+      document.getElementById('task-notes').value    = task.notes || '';
+      linkedTypeEl.value = task.linked_type || '';
+      linkedTypeEl.onchange();
+      if (task.linked_id) linkedIdEl.value = task.linked_id;
+    }
+  } else {
+    // Default due date to today
+    document.getElementById('task-due-date').value = new Date().toISOString().slice(0, 10);
+    linkedTypeEl.value = '';
+    linkedIdGroup.style.display = 'none';
+  }
+
+  openModal('task-modal');
+}
+
+document.getElementById('new-task-btn').addEventListener('click', () => openTaskModal());
+
+document.getElementById('task-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const title = document.getElementById('task-title').value.trim();
+  const dueDate = document.getElementById('task-due-date').value;
+  if (!title || !dueDate) { showToast('Please fill in title and due date', 'error'); return; }
+
+  const task = {
+    id:           editingTaskId || uid(),
+    title,
+    type:         document.getElementById('task-type').value,
+    due_date:     dueDate,
+    due_time:     document.getElementById('task-due-time').value,
+    linked_type:  document.getElementById('task-linked-type').value,
+    linked_id:    document.getElementById('task-linked-id').value,
+    status:       editingTaskId ? (DB.tasks.find(t => t.id === editingTaskId)?.status || 'Pending') : 'Pending',
+    notes:        document.getElementById('task-notes').value.trim(),
+    created_at:   editingTaskId ? (DB.tasks.find(t => t.id === editingTaskId)?.created_at || new Date().toISOString()) : new Date().toISOString(),
+  };
+
+  if (editingTaskId) {
+    DB.tasks = DB.tasks.map(t => t.id === editingTaskId ? task : t);
+    showToast('Task updated');
+  } else {
+    DB.tasks.unshift(task);
+    showToast('Task added');
+  }
+
+  closeModal('task-modal');
+  renderTasks();
+  updateTasksCount();
+});
+
+// ── FAB: New Task ──
+const fabNewTask = document.getElementById('fab-new-task');
+if (fabNewTask) {
+  fabNewTask.addEventListener('click', () => {
+    fabMenu.classList.remove('open');
+    fabMain.classList.remove('open');
+    navigateTo('tasks');
+    openTaskModal();
+  });
+}
+
+// ── Hook into renderAll ──
+const _origRenderAll = renderAll;
+renderAll = function() {
+  _origRenderAll();
+  renderTasks();
+  updateTasksCount();
+};
+
+// Init tasks now if DB already loaded
+if (DB.leads.length) {
+  renderTasks();
+  updateTasksCount();
+}
