@@ -1169,10 +1169,10 @@ function renderDashboard() {
   const pipelineValue = DB.leads.reduce((s, l) => s + (parseFloat(l.value) || 0), 0);
   const activeProjects = DB.projects.filter(p => p.status !== 'Wrapped').length;
   const today = new Date().toISOString().slice(0, 10);
-  const overdueTasks = DB.tasks.filter(t => !t.done && t.due && t.due < today).length;
+  const overdueTasks = DB.tasks.filter(t => t.status !== 'Done' && t.due_date && t.due_date < today).length;
   const dueSoon = DB.tasks.filter(t => {
-    if (t.done || !t.due) return false;
-    const diff = (new Date(t.due) - new Date(today)) / 86400000;
+    if (t.status === 'Done' || !t.due_date) return false;
+    const diff = (new Date(t.due_date) - new Date(today)) / 86400000;
     return diff >= 0 && diff <= 7;
   }).length;
 
@@ -1254,13 +1254,13 @@ function renderDashboard() {
       <div class="dash-panel">
         <div class="dash-panel-title">Tasks Due This Week ${dueSoon > 0 ? `<span class="dash-badge">${dueSoon}</span>` : ''}</div>
         ${DB.tasks.filter(t => {
-          if (t.done || !t.due) return false;
-          const diff = (new Date(t.due) - new Date(today)) / 86400000;
+          if (t.status === 'Done' || !t.due_date) return false;
+          const diff = (new Date(t.due_date) - new Date(today)) / 86400000;
           return diff >= 0 && diff <= 7;
         }).slice(0, 5).map(t => `
           <div class="dash-task-row">
             <span class="dash-task-title">${t.title}</span>
-            <span class="dash-task-due ${t.due < today ? 'overdue' : ''}">${formatDate(t.due)}</span>
+            <span class="dash-task-due ${t.due_date < today ? 'overdue' : ''}">${formatDate(t.due_date)}</span>
           </div>`).join('') || '<div class="dash-empty">All clear this week</div>'}
       </div>
     </div>
