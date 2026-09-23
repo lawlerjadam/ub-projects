@@ -9,7 +9,43 @@ const SUPABASE_URL  = 'https://wpllvyjjvwssqxplztsj.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_aRcisrW-iYogmuQhktDhtQ_yMhhNW1K';
 
 const { createClient } = supabase;
+// ── FX RATES (GBP base, fetched once on load) ─────────
+const FX = {
+  rates: { GBP: 1 },        // fallback: everything is GBP
+  fetchedAt: null,
+  async refresh() {
+    try {
+      // Open exchange rates — no key needed for latest.json on the free CDN mirror
+      const res = await fetch('https://open.er-api.com/v6/latest/GBP');
+      if (!res.ok) throw new Error('FX fetch failed');
+      const data = await res.json();
+      if (data.rates) {
+        this.rates = { GBP: 1, ...data.rates };
+        this.fetchedAt = new Date();
+        console.log('[FX] Rates refreshed at', this.fetchedAt.toISOString());
+      }
+    } catch (e) {
+      console.warn('[FX] Could not fetch rates, using 1:1 fallback.', e.message);
+    }
+  },
+  toGBP(amount, currency = 'GBP') {
+    const rate = this.rates[currency.toUpperCase()];
+    if (!rate || rate === 0) return parseFloat(amount) || 0;
+    // rates are GBP→X, so to convert X→GBP divide by rate
+    return (parseFloat(amount) || 0) / rate;
+  },
+  label() {
+    if (!this.fetchedAt) return '';
+    const d = this.fetchedAt;
+    return `Converted at today's rates (${d.getDate()} ${d.toLocaleString('default',{month:'short'})} ${d.getFullYear()})`;
+  },
+};
+
+
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// Kick off FX rate fetch immediately (non-blocking)
+FX.refresh().then(() => { if (typeof renderDashboard === 'function') renderDashboard(); });
 
 // ── LOCAL DB (in-memory, synced from Supabase) ────────
 let DB = {
@@ -1221,8 +1257,9 @@ function renderDashboard() {
   const el = document.getElementById('dashboard-content');
   if (!el) return;
 
-  const pipelineValue = DB.leads.reduce((s, l) => s + (parseFloat(l.value) || 0), 0);
-  const weightedPipeline = DB.leads.reduce((s, l) => s + (parseFloat(l.value) || 0) * ((l.probability ?? 50) / 100), 0);
+  const pipelineValue    = DB.leads.reduce((s, l) => s + FX.toGBP(l.value, l.currency || 'GBP'), 0);
+  const weightedPipeline = DB.leads.reduce((s, l) => s + FX.toGBP(l.value, l.currency || 'GBP') * ((l.probability ?? 50) / 100), 0);
+  const multiCurrency    = DB.leads.some(l => l.currency && l.currency !== 'GBP');
   const activeProjects = DB.projects.filter(p => p.status !== 'Wrapped').length;
   const today = new Date().toISOString().slice(0, 10);
   const overdueTasks = DB.tasks.filter(t => t.status !== 'Done' && t.due_date && t.due_date < today).length;
@@ -1236,8 +1273,8 @@ function renderDashboard() {
   const byStage = stageOrder.map(s => ({
     stage: s,
     count: DB.leads.filter(l => l.stage === s).length,
-    value: DB.leads.filter(l => l.stage === s).reduce((sum, l) => sum + (parseFloat(l.value) || 0), 0),
-    weighted: DB.leads.filter(l => l.stage === s).reduce((sum, l) => sum + (parseFloat(l.value) || 0) * ((l.probability ?? 50) / 100), 0),
+    value: DB.leads.filter(l => l.stage === s).reduce((sum, l) => sum + FX.toGBP(l.value, l.currency || 'GBP'), 0),
+    weighted: DB.leads.filter(l => l.stage === s).reduce((sum, l) => sum + FX.toGBP(l.value, l.currency || 'GBP') * ((l.probability ?? 50) / 100), 0),
   }));
 
   const recentLeads = DB.leads.slice(0, 4);
@@ -1280,6 +1317,7 @@ function renderDashboard() {
       </div>
 
     </div>
+    ${multiCurrency && FX.fetchedAt ? `<p class="dash-fx-note">${FX.label()}</p>` : ''}
 
     <div class="dash-grid">
       <div class="dash-panel">

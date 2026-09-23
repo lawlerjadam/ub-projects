@@ -3124,3 +3124,12 @@ html, body {
   text-align: right;
   white-space: nowrap;
 }
+
+/* ── FX conversion note on dashboard ── */
+.dash-fx-note {
+  font-size: 0.7rem;
+  color: var(--text-muted, #9ca3af);
+  margin: -4px 0 12px;
+  text-align: right;
+  letter-spacing: 0.01em;
+}
