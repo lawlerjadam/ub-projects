@@ -344,7 +344,7 @@ async function loadData() {
     if (contacts)  DB.contacts  = contacts;
     if (projects)  DB.projects  = projects;
     if (ideas)     DB.ideas     = ideas;
-    if (tasks)     DB.tasks     = tasks;
+    if (tasks)     DB.tasks     = tasks.map(t => ({ ...t, type: t.type || t.task_type || 'Task' }));
 
     // Seed if empty (first run)
     if (!DB.leads.length)     DB.leads     = SEED.leads;
@@ -1851,10 +1851,12 @@ document.getElementById('task-form').addEventListener('submit', (e) => {
   const dueDate = document.getElementById('task-due-date').value;
   if (!title || !dueDate) { showToast('Please fill in title and due date', 'error'); return; }
 
+  const taskTypeVal = document.getElementById('task-type').value;
   const task = {
     id:           editingTaskId || uid(),
     title,
-    type:         document.getElementById('task-type').value,
+    type:         taskTypeVal,
+    task_type:    taskTypeVal,
     due_date:     dueDate,
     due_time:     document.getElementById('task-due-time').value,
     linked_type:  document.getElementById('task-linked-type').value,
