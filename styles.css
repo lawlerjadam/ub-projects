@@ -308,6 +308,7 @@ html, body {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 /* Purple top accent bar */
@@ -3035,27 +3036,27 @@ html, body {
 }
 .back-btn.hidden { display: none !important; }
 
-/* Desktop back pill — fixed top-right of main content */
+/* Desktop back pill — absolute inside .main, over the purple accent bar */
 .back-btn--desktop {
-  position: fixed;
-  top: 18px;
-  right: 24px;
-  z-index: 200;
-  background: var(--surface-raised, #fff);
+  position: absolute;
+  top: 0;
+  right: 20px;
+  z-index: 10;
+  background: rgba(255,255,255,0.95);
   border: 1px solid var(--border, #e5e7eb);
-  border-radius: 999px;
-  padding: 6px 14px 6px 10px;
-  font-size: 0.82rem;
+  border-radius: 0 0 999px 999px;
+  padding: 2px 12px 6px 8px;
+  font-size: 0.78rem;
   font-weight: 500;
   color: var(--text-secondary, #6b7280);
-  gap: 5px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   transition: background 0.15s, color 0.15s, box-shadow 0.15s;
 }
 .back-btn--desktop:hover {
-  background: var(--surface-hover, #f3f4f6);
+  background: #fff;
   color: var(--text-primary, #111827);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.13);
 }
 .back-btn--desktop svg { flex-shrink: 0; }
 
