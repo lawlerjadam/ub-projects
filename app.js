@@ -371,11 +371,10 @@ async function loadData() {
 // Save helpers (no-op if Supabase tables not yet set up)
 async function persist(table, record) {
   try {
-    const { data, error } = await sb.from(table).upsert(record).select();
-    if (error) console.error('Supabase persist error [' + table + ']:', error.message, error);
-    else console.log('Supabase persist ok [' + table + ']:', data);
+    const { error } = await sb.from(table).upsert(record);
+    if (error) console.warn('Supabase persist error [' + table + ']:', error.message);
   } catch (e) {
-    console.error('Supabase persist exception [' + table + ']:', e);
+    console.warn('Supabase persist exception:', e);
   }
 }
 
