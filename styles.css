@@ -3035,7 +3035,35 @@ html, body {
 }
 .back-btn.hidden { display: none !important; }
 
-/* sidebar-logo flex so logo + back btn sit side by side */
+/* Desktop back pill — fixed top-right of main content */
+.back-btn--desktop {
+  position: fixed;
+  top: 18px;
+  right: 24px;
+  z-index: 200;
+  background: var(--surface-raised, #fff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 999px;
+  padding: 6px 14px 6px 10px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary, #6b7280);
+  gap: 5px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+.back-btn--desktop:hover {
+  background: var(--surface-hover, #f3f4f6);
+  color: var(--text-primary, #111827);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.back-btn--desktop svg { flex-shrink: 0; }
+
+/* Hide desktop pill on mobile */
+@media (max-width: 768px) {
+  .back-btn--desktop { display: none !important; }
+}
+
 .sidebar-logo {
   display: flex;
   align-items: center;
