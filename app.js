@@ -1276,10 +1276,7 @@ function renderDashboard() {
         <div class="dash-kpi-value">${activeProjects}</div>
         <div class="dash-kpi-label">Active Projects</div>
       </div>
-      <div class="dash-kpi dash-kpi--link ${overdueTasks > 0 ? 'dash-kpi--alert' : ''}" onclick="navigateTo('tasks')" title="View overdue tasks">
-        <div class="dash-kpi-value">${overdueTasks}</div>
-        <div class="dash-kpi-label">Overdue Tasks</div>
-      </div>
+
     </div>
 
     <div class="dash-grid">
