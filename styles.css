@@ -547,6 +547,7 @@ html, body {
   cursor: pointer;
   transition: box-shadow var(--transition), border-color var(--transition);
   position: relative;
+  overflow: hidden;
 }
 
 .lead-card:hover {
@@ -571,6 +572,8 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px;
   margin-top: 0.5rem;
 }
 
