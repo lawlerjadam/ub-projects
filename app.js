@@ -2041,6 +2041,27 @@ function renderLinkedTasks(linkedType, linkedId, listElId, addBtnId) {
 
 let activeLeadId = null;
 
+
+function renderLeadProposals(leadId) {
+  const el = document.getElementById('lead-proposals-list');
+  if (!el) return;
+  const proposals = DB.proposals.filter(p => p.lead_id === leadId);
+  if (!proposals.length) {
+    el.innerHTML = '<p style="color:var(--text-muted);font-size:0.875rem;padding:12px 0;">No proposals yet. Use → Proposal on the lead card to create one.</p>';
+    return;
+  }
+  el.innerHTML = proposals.map(p => {
+    const statusColour = p.status === 'Confirmed' ? '#22c55e' : p.status === 'Sent' ? '#f59e0b' : 'var(--text-muted)';
+    const linkedProject = DB.projects.find(pr => pr.proposal_id === p.id);
+    return `<div class="lead-proposal-row" onclick="navigateTo('proposals'); setTimeout(() => editProposal('${p.id}'), 100);">
+      <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+        <span style="font-size:0.85rem;font-weight:600;truncate;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.title}</span>
+        <span style="font-size:0.75rem;color:${statusColour};flex-shrink:0;">${p.status || 'Draft'}</span>
+      </div>
+      ${linkedProject ? `<span style="font-size:0.75rem;color:var(--ub-purple);flex-shrink:0;" onclick="event.stopPropagation();openProjectDrawer('${linkedProject.id}')">→ ${linkedProject.name}</span>` : ''}
+    </div>`;
+  }).join('');
+}
 window.openLeadDrawer = function(id) {
   activeLeadId = id;
   const lead = DB.leads.find(l => l.id === id);
@@ -2057,6 +2078,9 @@ window.openLeadDrawer = function(id) {
 
   // Tasks tab
   renderLinkedTasks('lead', id, 'lead-tasks-list', 'lead-add-task-btn');
+
+  // Proposals tab
+  renderLeadProposals(id);
 
   // Switch to notes tab by default
   switchLeadDrawerTab('lead-notes');

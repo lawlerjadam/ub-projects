@@ -3042,3 +3042,19 @@ html, body {
   gap: 8px;
 }
 
+/* ── Lead drawer proposals list ─────────────────────────────────────────── */
+.lead-proposals-list { display: flex; flex-direction: column; gap: 6px; padding: 8px 0; }
+.lead-proposal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--bg-secondary, var(--card-bg));
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.lead-proposal-row:hover { background: var(--hover-bg, rgba(100,0,140,0.06)); }
+
