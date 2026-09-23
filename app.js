@@ -1850,3 +1850,218 @@ taskForm.addEventListener('submit', () => {
   }, 50);
 });
 
+
+// ══════════════════════════════════════════════════════
+// PHASE 3 — CALENDAR VIEW
+// ══════════════════════════════════════════════════════
+
+let activeTasksView = 'list'; // 'list' | 'calendar'
+let calYear  = new Date().getFullYear();
+let calMonth = new Date().getMonth(); // 0-indexed
+let calSelectedDate = null;
+
+// ── View toggle ──────────────────────────────────────
+document.querySelectorAll('.tasks-view-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeTasksView = btn.dataset.view;
+    document.querySelectorAll('.tasks-view-btn').forEach(b =>
+      b.classList.toggle('active', b === btn));
+
+    const listEl     = document.getElementById('tasks-list');
+    const calEl      = document.getElementById('tasks-calendar');
+    const filterGrp  = document.getElementById('tasks-filter-group');
+
+    if (activeTasksView === 'calendar') {
+      listEl.classList.add('hidden');
+      calEl.classList.remove('hidden');
+      filterGrp.style.visibility = 'hidden';
+      renderCalendar();
+    } else {
+      listEl.classList.remove('hidden');
+      calEl.classList.add('hidden');
+      filterGrp.style.visibility = '';
+      renderTasks();
+    }
+  });
+});
+
+// ── Month navigation ─────────────────────────────────
+document.getElementById('cal-prev').addEventListener('click', () => {
+  calMonth--;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  calSelectedDate = null;
+  document.getElementById('cal-day-panel').classList.add('hidden');
+  renderCalendar();
+});
+
+document.getElementById('cal-next').addEventListener('click', () => {
+  calMonth++;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  calSelectedDate = null;
+  document.getElementById('cal-day-panel').classList.add('hidden');
+  renderCalendar();
+});
+
+document.getElementById('cal-day-panel-close').addEventListener('click', () => {
+  calSelectedDate = null;
+  document.getElementById('cal-day-panel').classList.add('hidden');
+  document.querySelectorAll('.cal-day.selected').forEach(d => d.classList.remove('selected'));
+});
+
+document.getElementById('cal-add-task-btn').addEventListener('click', () => {
+  if (!calSelectedDate) return;
+  openTaskModal(null);
+  // Pre-fill the date after modal opens
+  setTimeout(() => {
+    document.getElementById('task-due-date').value = calSelectedDate;
+  }, 50);
+});
+
+// ── Core render ──────────────────────────────────────
+function renderCalendar() {
+  const MONTHS = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+  document.getElementById('cal-month-label').textContent = `${MONTHS[calMonth]} ${calYear}`;
+
+  const today = new Date().toISOString().slice(0, 10);
+  const grid  = document.getElementById('cal-grid');
+
+  // First day of month (Mon=0 offset)
+  const firstDay = new Date(calYear, calMonth, 1);
+  const lastDay  = new Date(calYear, calMonth + 1, 0);
+  // Monday-first offset (0=Mon ... 6=Sun)
+  let startOffset = firstDay.getDay() - 1;
+  if (startOffset < 0) startOffset = 6;
+
+  // Build index: dateStr -> tasks[]
+  const tasksByDate = {};
+  DB.tasks.forEach(t => {
+    if (!t.due_date) return;
+    if (!tasksByDate[t.due_date]) tasksByDate[t.due_date] = [];
+    tasksByDate[t.due_date].push(t);
+  });
+
+  let cells = '';
+
+  // Leading empty cells
+  for (let i = 0; i < startOffset; i++) {
+    cells += `<div class="cal-day cal-day--empty"></div>`;
+  }
+
+  // Day cells
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const mm     = String(calMonth + 1).padStart(2, '0');
+    const dd     = String(d).padStart(2, '0');
+    const dateStr = `${calYear}-${mm}-${dd}`;
+    const dayTasks = tasksByDate[dateStr] || [];
+    const isToday  = dateStr === today;
+    const isSelected = dateStr === calSelectedDate;
+
+    const pending  = dayTasks.filter(t => t.status !== 'Done');
+    const done     = dayTasks.filter(t => t.status === 'Done');
+    const overdue  = pending.filter(t => isOverdue(t.due_date, t.status));
+
+    let dayCls = 'cal-day';
+    if (isToday)    dayCls += ' cal-day--today';
+    if (isSelected) dayCls += ' selected';
+    if (overdue.length && !isToday) dayCls += ' cal-day--overdue';
+
+    // Up to 3 dots
+    const dots = pending.slice(0, 3).map(t => {
+      const dotCls = isOverdue(t.due_date, t.status) ? 'cal-dot cal-dot--overdue'
+                   : isToday ? 'cal-dot cal-dot--today'
+                   : `cal-dot cal-dot--${t.type.toLowerCase().replace(/[^a-z]/g,'-')}`;
+      return `<span class="${dotCls}"></span>`;
+    }).join('');
+    const overflow = pending.length > 3
+      ? `<span class="cal-overflow">+${pending.length - 3}</span>` : '';
+
+    cells += `
+      <div class="${dayCls}" data-date="${dateStr}">
+        <span class="cal-day-num">${d}</span>
+        <div class="cal-dots">${dots}${overflow}</div>
+      </div>`;
+  }
+
+  grid.innerHTML = cells;
+
+  // Click handler on day cells
+  grid.querySelectorAll('.cal-day:not(.cal-day--empty)').forEach(cell => {
+    cell.addEventListener('click', () => {
+      const date = cell.dataset.date;
+      grid.querySelectorAll('.cal-day.selected').forEach(d => d.classList.remove('selected'));
+
+      if (calSelectedDate === date) {
+        // Toggle off
+        calSelectedDate = null;
+        document.getElementById('cal-day-panel').classList.add('hidden');
+      } else {
+        calSelectedDate = date;
+        cell.classList.add('selected');
+        renderCalDayPanel(date);
+        document.getElementById('cal-day-panel').classList.remove('hidden');
+      }
+    });
+  });
+}
+
+function renderCalDayPanel(dateStr) {
+  const [y, m, d] = dateStr.split('-');
+  const label = new Date(+y, +m - 1, +d).toLocaleDateString('en-GB', {
+    weekday: 'long', day: 'numeric', month: 'long'
+  });
+  document.getElementById('cal-day-panel-title').textContent = label;
+
+  const tasks = DB.tasks.filter(t => t.due_date === dateStr);
+  const el = document.getElementById('cal-day-tasks');
+
+  if (!tasks.length) {
+    el.innerHTML = '<div class="cal-day-empty">No tasks</div>';
+    return;
+  }
+
+  el.innerHTML = tasks.map(task => {
+    const done = task.status === 'Done';
+    const linked = linkedRecordName(task);
+    return `
+      <div class="cal-task-row ${done ? 'is-done' : ''}" data-id="${task.id}">
+        <input type="checkbox" class="cal-task-check" data-id="${task.id}" ${done ? 'checked' : ''}>
+        <div class="cal-task-body">
+          <div class="cal-task-title">${task.title}</div>
+          <div class="cal-task-meta">
+            <span class="${taskTypeBadgeClass(task.type)}">${task.type}</span>
+            ${task.due_time ? `<span class="cal-task-time">${task.due_time}</span>` : ''}
+            ${linked ? `<span class="linked-task-linked">↳ ${linked}</span>` : ''}
+          </div>
+        </div>
+        <button class="linked-task-edit cal-task-edit" data-id="${task.id}" title="Edit">✎</button>
+      </div>`;
+  }).join('');
+
+  el.querySelectorAll('.cal-task-check').forEach(cb => {
+    cb.addEventListener('change', async () => {
+      const task = DB.tasks.find(t => t.id === cb.dataset.id);
+      if (!task) return;
+      task.status = cb.checked ? 'Done' : 'Pending';
+      await persist('tasks', task);
+      renderCalDayPanel(dateStr);
+      renderCalendar();
+      updateTasksCount();
+    });
+  });
+
+  el.querySelectorAll('.cal-task-edit').forEach(btn => {
+    btn.addEventListener('click', () => openTaskModal(btn.dataset.id));
+  });
+}
+
+// Re-render calendar when tasks change (if calendar is active)
+const _origRenderTasksForCal = renderTasks;
+function renderTasksAndCal() {
+  _origRenderTasksForCal();
+  if (activeTasksView === 'calendar') {
+    renderCalendar();
+    if (calSelectedDate) renderCalDayPanel(calSelectedDate);
+  }
+}
+
