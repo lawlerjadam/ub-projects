@@ -466,7 +466,7 @@ function navigateTo(section, pushHistory = true) {
   if (titleEl) {
     const labels = {
       dashboard: 'Dashboard', ideas: 'Ideas Park', leads: 'Leads',
-      proposals: 'Proposals', projects: 'Projects', clients: 'Clients',
+      proposals: 'Proposals', projects: 'Projects', clients: 'Partners',
       tasks: 'Tasks', finance: 'Finance'
     };
     titleEl.textContent = labels[section] || section;
@@ -617,7 +617,7 @@ function renderProposals() {
     return `
       <tr onclick="editProposal('${p.id}')">
         <td data-label="Title"><strong>${p.title}</strong></td>
-        <td data-label="Client">${p.client || '—'}</td>
+        <td data-label="Partner">${p.client || '—'}</td>
         <td data-label="Lead">${lead ? lead.name : '—'}</td>
         <td data-label="Value">${formatCurrency(total)}</td>
         <td data-label="Status">${statusBadge(p.status || 'Draft')}</td>
@@ -2495,7 +2495,7 @@ document.addEventListener('keydown', (e) => {
 const SECTION_TITLES = {
     dashboard: 'Dashboard',
   ideas: 'Ideas Park', leads: 'Leads', proposals: 'Proposals',
-  clients: 'Clients', projects: 'Projects', tasks: 'Tasks',
+  clients: 'Partners', projects: 'Projects', tasks: 'Tasks',
 };
 const DEVELOP_SECTIONS = ['ideas', 'leads', 'proposals'];
 const MANAGE_SECTIONS  = ['clients', 'projects', 'tasks'];

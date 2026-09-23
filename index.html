@@ -103,7 +103,7 @@
     <div class="tab-tray hidden" id="tray-manage">
       <a href="#" class="tray-item" data-section="clients">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg>
-        Clients
+        Partners
       </a>
       <a href="#" class="tray-item" data-section="projects">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -163,7 +163,7 @@
         <span class="nav-section-label nav-section-label--gap">Manage</span>
         <a href="#" class="nav-item" data-section="clients">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg>
-          Clients
+          Partners
           <span class="nav-badge" id="clients-count">0</span>
         </a>
         <a href="#" class="nav-item" data-section="projects">
@@ -313,7 +313,7 @@
             <thead>
               <tr>
                 <th>Title</th>
-                <th>Client</th>
+                <th>Partner</th>
                 <th>Linked Lead</th>
                 <th>Total Value</th>
                 <th>Status</th>
@@ -330,10 +330,10 @@
       <section id="section-clients" class="section">
         <div class="section-header">
           <div>
-            <h1 class="section-title">Clients</h1>
+            <h1 class="section-title">Partners</h1>
             <p class="section-sub">Companies and contacts — venues, co-producers, promoters, funders</p>
           </div>
-          <button class="btn btn-primary" id="new-client-btn">+ New Client</button>
+          <button class="btn btn-primary" id="new-client-btn">+ New Partner</button>
         </div>
         <div class="clients-layout">
           <div class="companies-panel">
@@ -493,7 +493,7 @@
         </div>
         <div class="form-row">
           <div class="field-group">
-            <label for="proposal-client">Client / Addressee</label>
+            <label for="proposal-client">Partner / Addressee</label>
             <input type="text" id="proposal-client" placeholder="e.g. Traverse Theatre" />
           </div>
           <div class="field-group">
@@ -547,7 +547,7 @@
   <div id="client-modal" class="modal-overlay hidden">
     <div class="modal">
       <div class="modal-header">
-        <h2 class="modal-title" id="client-modal-title">New Company</h2>
+        <h2 class="modal-title" id="client-modal-title">New Partner</h2>
         <button class="modal-close" data-modal="client-modal">×</button>
       </div>
       <form id="client-form" class="modal-form" novalidate>
@@ -707,7 +707,7 @@
         </div>
         <div class="form-row">
           <div class="field-group">
-            <label for="project-client">Client / Presenter</label>
+            <label for="project-client">Partner / Presenter</label>
             <input type="text" id="project-client" placeholder="e.g. Barbican Centre" />
           </div>
           <div class="field-group">
@@ -1010,7 +1010,7 @@
               <option value="">— None —</option>
               <option value="lead">Lead</option>
               <option value="proposal">Proposal</option>
-              <option value="client">Client</option>
+              <option value="client">Partner</option>
               <option value="project">Project</option>
             </select>
           </div>
