@@ -1558,15 +1558,14 @@ document.addEventListener('click', (e) => {
 });
 
 const fabActions = {
-  'fab-new-idea':     () => { navigateTo('ideas');     document.getElementById('idea-form').reset(); document.getElementById('idea-form').dataset.editId = ''; document.getElementById('idea-modal-title').textContent = 'New Idea'; openModal('idea-modal'); },
-  'fab-new-lead':     () => { navigateTo('leads');     document.getElementById('lead-form').reset(); document.getElementById('lead-form').dataset.editId = ''; document.getElementById('lead-modal-title').textContent = 'New Lead'; openModal('lead-modal'); },
-  'fab-new-proposal': () => { navigateTo('proposals'); document.getElementById('proposal-form').reset(); document.getElementById('proposal-form').dataset.editId = ''; document.getElementById('proposal-modal-title').textContent = 'New Proposal'; openModal('proposal-modal'); },
-  'fab-new-client':   () => { navigateTo('clients');   document.getElementById('client-form').reset(); document.getElementById('client-form').dataset.editId = ''; document.getElementById('client-modal-title').textContent = 'New Company'; openModal('client-modal'); },
-  'fab-new-project':  () => { navigateTo('projects');  document.getElementById('project-form').reset(); document.getElementById('project-form').dataset.editId = ''; document.getElementById('project-modal-title').textContent = 'New Project'; openModal('project-modal'); },
+  'fab-new-idea':  () => { navigateTo('ideas'); document.getElementById('idea-form').reset(); document.getElementById('idea-form').dataset.editId = ''; document.getElementById('idea-modal-title').textContent = 'New Idea'; openModal('idea-modal'); },
+  'fab-new-lead':  () => { navigateTo('leads'); document.getElementById('lead-form').reset(); document.getElementById('lead-form').dataset.editId = ''; document.getElementById('lead-modal-title').textContent = 'New Lead'; openModal('lead-modal'); },
 };
 
 Object.entries(fabActions).forEach(([id, fn]) => {
-  document.getElementById(id).addEventListener('click', () => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('click', () => {
     fabMenu.classList.remove('open');
     fabMain.classList.remove('open');
     fn();
@@ -2413,8 +2412,10 @@ function spinWheel() {
 }
 
 function openEgg() {
+  const overlay = document.getElementById('egg-overlay');
+  if (!overlay) { console.warn('egg-overlay not found'); return; }
   spinWheel();
-  document.getElementById('egg-overlay').classList.remove('hidden');
+  overlay.classList.remove('hidden');
 }
 
 function closeEgg() {
