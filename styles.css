@@ -2774,3 +2774,8 @@ html, body {
     padding-top: calc(52px + env(safe-area-inset-top, 0px) + 16px) !important;
   }
 }
+
+/* Hide FAB on mobile — Quick Add is in the bottom tab bar */
+@media (max-width: 768px) {
+  .fab-container { display: none !important; }
+}
