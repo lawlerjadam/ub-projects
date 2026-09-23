@@ -539,6 +539,7 @@ function renderProposals() {
         <td data-label="Status">${statusBadge(p.status || 'Draft')}</td>
         <td data-label="Sent">${formatDate(p.sent_date)}</td>
         <td data-label="Actions">
+          ${p.status === 'Confirmed' ? `<button class="btn-ghost convert-btn" onclick="convertProposalToProject('${p.id}'); event.stopPropagation();">→ Project</button>` : ''}
           <button class="btn-ghost" onclick="previewProposal('${p.id}'); event.stopPropagation();">Preview</button>
           <button class="btn-ghost" onclick="deleteProposal('${p.id}'); event.stopPropagation();" style="color:var(--red)">Delete</button>
         </td>
@@ -905,7 +906,7 @@ function renderProjects() {
             <div class="project-card-name">${p.name}</div>
             ${statusBadge(p.status || 'Development')}
           </div>
-          <div class="project-card-venue">${p.venue || '—'}</div>
+          <div class="project-card-venue">${p.client ? p.client + (p.venue ? ' · ' + p.venue : '') : (p.venue || '—')}</div>
           ${typeBadge(p.type)}
         </div>
         <div class="project-card-footer">
@@ -936,12 +937,18 @@ document.getElementById('new-project-btn').addEventListener('click', () => {
 document.getElementById('project-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const id = document.getElementById('project-id').value || uid();
+  const fromProposal = document.getElementById('project-form').dataset.fromProposal || null;
+  document.getElementById('project-form').dataset.fromProposal = '';
   const record = {
     id,
+    proposal_id: fromProposal || (DB.projects.find(p => p.id === id) || {}).proposal_id || null,
     name:       document.getElementById('project-name').value.trim(),
     type:       document.getElementById('project-type').value,
     venue:      document.getElementById('project-venue').value.trim(),
     status:     document.getElementById('project-status').value,
+    client:     document.getElementById('project-client').value.trim(),
+    fee:        parseFloat(document.getElementById('project-fee').value) || null,
+    brief:      document.getElementById('project-brief') ? document.getElementById('project-brief').value.trim() : '',
     start_date: document.getElementById('project-start').value || null,
     end_date:   document.getElementById('project-end').value || null,
     brief:      '',
@@ -976,6 +983,10 @@ window.editProject = (id) => {
   document.getElementById('project-type').value   = p.type || '';
   document.getElementById('project-venue').value  = p.venue || '';
   document.getElementById('project-status').value = p.status || '';
+  document.getElementById('project-client').value = p.client || '';
+  document.getElementById('project-fee').value    = p.fee || '';
+  const briefEl = document.getElementById('project-brief');
+  if (briefEl) briefEl.value = p.brief || '';
   document.getElementById('project-start').value  = p.start_date || '';
   document.getElementById('project-end').value    = p.end_date || '';
   openModal('project-modal');
@@ -997,14 +1008,20 @@ function openProjectDrawer(id) {
   if (!p) return;
 
   document.getElementById('drawer-project-name').textContent = p.name;
+  const linkedProposal = p.proposal_id ? DB.proposals.find(pr => pr.id === p.proposal_id) : null;
+  const proposalLink = linkedProposal
+    ? ` <span class="drawer-back-link" onclick="navigateTo('proposals'); setTimeout(() => editProposal('${linkedProposal.id}'), 100);" title="View proposal">📄 ${linkedProposal.title}</span>`
+    : '';
+  const feeTag = p.fee ? ` <span style="color:var(--text-muted);font-size:0.8rem;">${formatCurrency(p.fee, 'GBP')}</span>` : '';
   document.getElementById('drawer-project-meta').innerHTML =
-    `${typeBadge(p.type)} ${statusBadge(p.status || 'Development')} <span style="color:var(--text-muted)">${p.venue || ''}</span>`;
+    `${typeBadge(p.type)} ${statusBadge(p.status || 'Development')} <span style="color:var(--text-muted)">${p.venue || ''}</span>${feeTag}${proposalLink}`;
 
   // Switch to brief tab
   switchDrawerTab('brief');
   document.getElementById('brief-content').value = p.brief || '';
   renderTimeline(p);
   renderDocs(p);
+  renderLinkedTasks('project', id, 'project-tasks-list', 'project-add-task-btn');
 
   document.getElementById('project-drawer').classList.remove('hidden');
 }
@@ -1273,6 +1290,32 @@ window.convertLeadToProposal = (leadId) => {
   populateLeadSelect(lead.id);
   navigateTo('proposals');
   openModal('proposal-modal');
+};
+
+
+// ── PIPELINE: Convert Proposal → Project ──────────────────
+window.convertProposalToProject = (proposalId) => {
+  const proposal = DB.proposals.find(p => p.id === proposalId);
+  if (!proposal) return;
+
+  const total = (proposal.phases || []).reduce((s, ph) => s + (ph.fee || 0), 0);
+
+  // Reset form
+  document.getElementById('project-id').value = '';
+  document.getElementById('project-form').reset();
+  document.getElementById('project-modal-title').textContent = 'Convert to Project';
+
+  // Pre-fill from proposal
+  document.getElementById('project-name').value   = proposal.title || '';
+  document.getElementById('project-client').value = proposal.client || '';
+  document.getElementById('project-brief').value  = proposal.intro || '';
+  document.getElementById('project-fee').value    = total || '';
+
+  // Store proposal_id to link back
+  document.getElementById('project-form').dataset.fromProposal = proposalId;
+
+  navigateTo('projects');
+  openModal('project-modal');
 };
 
 // ── BOOT ───────────────────────────────────────────────

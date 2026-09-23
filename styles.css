@@ -2945,3 +2945,24 @@ html, body {
   .dash-kpis { grid-template-columns: 1fr 1fr; }
   .dash-grid  { grid-template-columns: 1fr; }
 }
+
+/* Proposal back-link in project drawer */
+.drawer-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--ub-purple);
+  cursor: pointer;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border: 1px solid var(--ub-purple);
+  border-radius: 99px;
+  font-weight: 500;
+  vertical-align: middle;
+  transition: background 0.15s;
+}
+.drawer-back-link:hover { background: var(--ub-purple); color: #fff; }
+
+/* Convert proposal button */
+.btn-ghost.convert-btn { color: var(--ub-purple); font-weight: 600; }
