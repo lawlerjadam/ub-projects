@@ -2421,7 +2421,8 @@ function closeEgg() {
   document.getElementById('egg-overlay').classList.add('hidden');
 }
 
-document.getElementById('cowhead-btn').addEventListener('click', openEgg);
+const cowBtn = document.getElementById('cowhead-btn');
+if (cowBtn) cowBtn.addEventListener('click', openEgg);
 
 // Also close on Escape
 document.addEventListener('keydown', (e) => {
