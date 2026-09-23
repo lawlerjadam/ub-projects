@@ -389,8 +389,17 @@ function navigateTo(section) {
   activeSection = section;
 
   document.querySelectorAll('.nav-item').forEach(i => i.classList.toggle('active', i.dataset.section === section));
+  document.querySelectorAll('.tab-item').forEach(i => i.classList.toggle('active', i.dataset.section === section));
   document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === `section-${section}`));
 }
+
+// ── MOBILE TAB BAR ────────────────────────────────────
+document.querySelectorAll('.tab-item').forEach(item => {
+  item.addEventListener('click', (e) => {
+    e.preventDefault();
+    navigateTo(item.dataset.section);
+  });
+});
 
 // ── RENDER ALL ──────────────────────────────────────────
 function renderAll() {
@@ -513,13 +522,13 @@ function renderProposals() {
     const total = (p.phases || []).reduce((s, ph) => s + (ph.fee || 0), 0);
     return `
       <tr onclick="editProposal('${p.id}')">
-        <td><strong>${p.title}</strong></td>
-        <td>${p.client || '—'}</td>
-        <td>${lead ? lead.name : '—'}</td>
-        <td>${formatCurrency(total)}</td>
-        <td>${statusBadge(p.status || 'Draft')}</td>
-        <td>${formatDate(p.sent_date)}</td>
-        <td>
+        <td data-label="Title"><strong>${p.title}</strong></td>
+        <td data-label="Client">${p.client || '—'}</td>
+        <td data-label="Lead">${lead ? lead.name : '—'}</td>
+        <td data-label="Value">${formatCurrency(total)}</td>
+        <td data-label="Status">${statusBadge(p.status || 'Draft')}</td>
+        <td data-label="Sent">${formatDate(p.sent_date)}</td>
+        <td data-label="Actions">
           <button class="btn-ghost" onclick="previewProposal('${p.id}'); event.stopPropagation();">Preview</button>
           <button class="btn-ghost" onclick="deleteProposal('${p.id}'); event.stopPropagation();" style="color:var(--red)">Delete</button>
         </td>
