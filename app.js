@@ -2155,3 +2155,115 @@ document.getElementById('cowhead-btn').addEventListener('click', openEgg);
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeEgg();
 });
+
+// ══════════════════════════════════════════════════════
+// MOBILE TOP BAR + GROUPED TAB BAR WITH TRAYS
+// ══════════════════════════════════════════════════════
+const SECTION_TITLES = {
+  ideas: 'Ideas Park', leads: 'Leads', proposals: 'Proposals',
+  clients: 'Clients', projects: 'Projects', tasks: 'Tasks',
+};
+const DEVELOP_SECTIONS = ['ideas', 'leads', 'proposals'];
+const MANAGE_SECTIONS  = ['clients', 'projects', 'tasks'];
+
+function updateMobileTopBar(section) {
+  const titleEl = document.getElementById('mobile-top-title');
+  if (titleEl) titleEl.textContent = SECTION_TITLES[section] || section;
+
+  // Highlight active group button
+  const devBtn = document.getElementById('tab-develop-btn');
+  const mngBtn = document.getElementById('tab-manage-btn');
+  if (devBtn) devBtn.classList.toggle('active', DEVELOP_SECTIONS.includes(section));
+  if (mngBtn) mngBtn.classList.toggle('active', MANAGE_SECTIONS.includes(section));
+}
+
+function closeAllTrays() {
+  ['tray-develop', 'tray-manage', 'tray-quick-add'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+  });
+  const addBtn = document.getElementById('tab-quick-add-btn');
+  if (addBtn) addBtn.classList.remove('open');
+  const backdrop = document.getElementById('tray-backdrop');
+  if (backdrop) backdrop.classList.remove('active');
+}
+
+function openTray(trayId) {
+  closeAllTrays();
+  const tray = document.getElementById(trayId);
+  if (tray) {
+    tray.classList.remove('hidden');
+    const backdrop = document.getElementById('tray-backdrop');
+    if (backdrop) backdrop.classList.add('active');
+  }
+}
+
+// Tray backdrop closes all trays
+const trayBackdrop = document.getElementById('tray-backdrop');
+if (trayBackdrop) trayBackdrop.addEventListener('click', closeAllTrays);
+
+// Develop button
+const devBtn = document.getElementById('tab-develop-btn');
+if (devBtn) devBtn.addEventListener('click', () => {
+  const tray = document.getElementById('tray-develop');
+  if (tray && !tray.classList.contains('hidden')) { closeAllTrays(); return; }
+  openTray('tray-develop');
+});
+
+// Manage button
+const mngBtn = document.getElementById('tab-manage-btn');
+if (mngBtn) mngBtn.addEventListener('click', () => {
+  const tray = document.getElementById('tray-manage');
+  if (tray && !tray.classList.contains('hidden')) { closeAllTrays(); return; }
+  openTray('tray-manage');
+});
+
+// Quick Add button
+const qaBtn = document.getElementById('tab-quick-add-btn');
+if (qaBtn) qaBtn.addEventListener('click', () => {
+  const tray = document.getElementById('tray-quick-add');
+  if (tray && !tray.classList.contains('hidden')) { closeAllTrays(); return; }
+  openTray('tray-quick-add');
+  qaBtn.classList.add('open');
+});
+
+// Tray navigation items
+document.querySelectorAll('.tray-item[data-section]').forEach(item => {
+  item.addEventListener('click', (e) => {
+    e.preventDefault();
+    navigateTo(item.dataset.section);
+    closeAllTrays();
+  });
+});
+
+// Quick Add tray actions
+const QA_MAP = {
+  'qa-idea':     () => document.getElementById('new-idea-btn')?.click(),
+  'qa-lead':     () => document.getElementById('new-lead-btn')?.click(),
+  'qa-proposal': () => document.getElementById('new-proposal-btn')?.click(),
+  'qa-task':     () => document.getElementById('new-task-btn')?.click(),
+};
+Object.entries(QA_MAP).forEach(([id, fn]) => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('click', (e) => {
+    e.preventDefault();
+    closeAllTrays();
+    fn();
+  });
+});
+
+// Hook into navigateTo to update top bar title
+const _origNavigateTo = navigateTo;
+// patch: extend navigateTo to also update top bar
+const _navigateToPatched = (section) => {
+  _origNavigateTo(section);
+  updateMobileTopBar(section);
+};
+// override global
+window.navigateTo = _navigateToPatched;
+// update on first load
+updateMobileTopBar(activeSection);
+
+// Cowhead in mobile top bar → Easter egg
+const cowMobileBtn = document.getElementById('cowhead-mobile-btn');
+if (cowMobileBtn) cowMobileBtn.addEventListener('click', openEgg);

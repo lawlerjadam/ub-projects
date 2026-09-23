@@ -47,29 +47,86 @@
        APP SHELL (hidden until authed)
   ═══════════════════════════════════════════ -->
   <div id="app" class="app hidden">
+    <!-- Mobile top bar -->
+    <header class="mobile-top-bar" id="mobile-top-bar">
+      <img src="ub-icon.png" id="cowhead-mobile-btn" style="width:30px;height:30px;filter:brightness(0) invert(1);cursor:pointer;flex-shrink:0;" alt="Underbelly" title="🐄">
+      <span class="mobile-top-title" id="mobile-top-title">Ideas Park</span>
+      <div style="width:30px;"></div>
+    </header>
+
     <!-- Mobile bottom tab bar -->
     <nav class="mobile-tab-bar" id="mobile-tab-bar">
-      <a href="#" class="tab-item active" data-section="ideas">
+
+      <!-- Develop group -->
+      <button class="tab-group-btn active" id="tab-develop-btn" data-group="develop">
         <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.6-1.4 4.9-3.5 6.3V17a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-1.7C6.4 13.9 5 11.6 5 9a7 7 0 0 1 7-7z"/></svg>
-        <span>Ideas</span>
-      </a>
-      <a href="#" class="tab-item" data-section="leads">
-        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        <span>Leads</span>
-      </a>
-      <a href="#" class="tab-item" data-section="proposals">
-        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        <span>Proposals</span>
-      </a>
-      <a href="#" class="tab-item" data-section="projects">
+        <span>Develop</span>
+      </button>
+
+      <!-- Quick Add centre -->
+      <button class="tab-quick-add" id="tab-quick-add-btn" aria-label="Quick add">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+
+      <!-- Manage group -->
+      <button class="tab-group-btn" id="tab-manage-btn" data-group="manage">
         <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span>Projects</span>
-      </a>
-      <a href="#" class="tab-item" data-section="tasks">
-        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 15 11 17 15 13"/></svg>
-        <span>Tasks</span>
-      </a>
+        <span>Manage</span>
+      </button>
+
     </nav>
+
+    <!-- Develop tray -->
+    <div class="tab-tray hidden" id="tray-develop">
+      <a href="#" class="tray-item" data-section="ideas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.6-1.4 4.9-3.5 6.3V17a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-1.7C6.4 13.9 5 11.6 5 9a7 7 0 0 1 7-7z"/></svg>
+        Ideas Park
+      </a>
+      <a href="#" class="tray-item" data-section="leads">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Leads
+      </a>
+      <a href="#" class="tray-item" data-section="proposals">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Proposals
+      </a>
+    </div>
+
+    <!-- Manage tray -->
+    <div class="tab-tray hidden" id="tray-manage">
+      <a href="#" class="tray-item" data-section="clients">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg>
+        Clients
+      </a>
+      <a href="#" class="tray-item" data-section="projects">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Projects
+      </a>
+      <a href="#" class="tray-item" data-section="tasks">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 15 11 17 15 13"/></svg>
+        Tasks
+      </a>
+    </div>
+
+    <!-- Quick Add tray -->
+    <div class="tab-tray tab-tray--add hidden" id="tray-quick-add">
+      <a href="#" class="tray-item tray-item--add" id="qa-idea">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.6-1.4 4.9-3.5 6.3V17a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-1.7C6.4 13.9 5 11.6 5 9a7 7 0 0 1 7-7z"/></svg>
+        New Idea
+      </a>
+      <a href="#" class="tray-item tray-item--add" id="qa-lead">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        New Lead
+      </a>
+      <a href="#" class="tray-item tray-item--add" id="qa-proposal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        New Proposal
+      </a>
+      <a href="#" class="tray-item tray-item--add" id="qa-task">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 15 11 17 15 13"/></svg>
+        New Task
+      </a>
+    </div>
 
     <!-- Sidebar -->
     <aside class="sidebar">
@@ -975,5 +1032,7 @@
     </div>
   </div>
 
+
+  <div class="tray-backdrop" id="tray-backdrop"></div>
 </body>
 </html>

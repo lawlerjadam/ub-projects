@@ -2651,3 +2651,126 @@ html, body {
 .egg-concept.spinning, .egg-where.spinning {
   animation: spinText 0.3s ease both;
 }
+
+/* ── Mobile top bar ── */
+.mobile-top-bar {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: calc(52px + env(safe-area-inset-top, 0px));
+  padding-top: env(safe-area-inset-top, 0px);
+  background: var(--ub-purple, #64008c);
+  z-index: 201;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.mobile-top-title {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* ── Redesigned bottom tab bar ── */
+.tab-group-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: rgba(255,255,255,0.5);
+  background: none;
+  border: none;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  padding-top: 8px;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s;
+}
+.tab-group-btn.active { color: #fff; }
+.tab-group-btn .tab-icon { width: 22px; height: 22px; stroke: currentColor; }
+
+.tab-quick-add {
+  width: 52px;
+  height: 52px;
+  background: #fff;
+  color: var(--ub-purple, #64008c);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: -18px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.tab-quick-add:active { transform: scale(0.93); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.tab-quick-add.open { transform: rotate(45deg); }
+
+/* ── Trays (pop up above tab bar) ── */
+.tab-tray {
+  position: fixed;
+  bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 8px);
+  background: var(--ub-purple-dk, #4a006a);
+  border-radius: 16px;
+  padding: 8px;
+  z-index: 202;
+  min-width: 180px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  animation: trayUp 0.2s cubic-bezier(.34,1.56,.64,1) both;
+}
+.tab-tray.hidden { display: none; }
+@keyframes trayUp {
+  from { opacity: 0; transform: translateY(12px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* Position develop tray left, manage tray right, add tray centre */
+#tray-develop   { left: 12px; }
+#tray-manage    { right: 12px; }
+#tray-quick-add { left: 50%; transform: translateX(-50%); }
+#tray-quick-add.hidden { display: none; }
+#tray-quick-add:not(.hidden) { transform: translateX(-50%); animation: trayUp 0.2s cubic-bezier(.34,1.56,.64,1) both; }
+
+.tray-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  color: rgba(255,255,255,0.9);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 10px;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.1s;
+}
+.tray-item:active,
+.tray-item:hover { background: rgba(255,255,255,0.12); }
+.tray-item--add { color: #fff; }
+
+/* Tray backdrop (invisible, closes trays on outside tap) */
+.tray-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+}
+.tray-backdrop.active { display: block; }
+
+/* ── Mobile: show top bar + adjust main padding ── */
+@media (max-width: 768px) {
+  .mobile-top-bar { display: flex; }
+  .main {
+    padding-top: calc(52px + env(safe-area-inset-top, 0px) + 16px) !important;
+  }
+}
