@@ -434,7 +434,7 @@ function renderLeads() {
 
 function leadCardHTML(lead) {
   return `
-    <div class="lead-card" data-id="${lead.id}">
+    <div class="lead-card" data-id="${lead.id}" onclick="editLead('${lead.id}')" style="cursor:pointer;">
       <div class="lead-card-name">${lead.name}</div>
       <div class="lead-card-venue">${lead.venue || '—'}</div>
       ${typeBadge(lead.type)}
