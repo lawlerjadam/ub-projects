@@ -23,6 +23,7 @@ let DB = {
 
 // Active context
 let activeSection     = 'dashboard';
+let navHistory        = [];
 let activeCompanyId   = null;
 let activeProjectId   = null;
 let activeDrawerTab   = 'brief';
@@ -393,12 +394,37 @@ document.querySelectorAll('.nav-item').forEach(item => {
   });
 });
 
-function navigateTo(section) {
+function navigateTo(section, pushHistory = true) {
+  if (pushHistory && section !== activeSection) {
+    navHistory.push(activeSection);
+    if (navHistory.length > 20) navHistory.shift();
+  }
   activeSection = section;
 
   document.querySelectorAll('.nav-item').forEach(i => i.classList.toggle('active', i.dataset.section === section));
   document.querySelectorAll('.tab-item').forEach(i => i.classList.toggle('active', i.dataset.section === section));
   document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === `section-${section}`));
+
+  // Show/hide back button
+  const backBtns = document.querySelectorAll('.back-btn');
+  backBtns.forEach(b => b.classList.toggle('hidden', navHistory.length === 0));
+
+  // Update mobile top bar title
+  const titleEl = document.getElementById('mobile-top-title');
+  if (titleEl) {
+    const labels = {
+      dashboard: 'Dashboard', ideas: 'Ideas Park', leads: 'Leads',
+      proposals: 'Proposals', projects: 'Projects', clients: 'Clients',
+      tasks: 'Tasks', finance: 'Finance'
+    };
+    titleEl.textContent = labels[section] || section;
+  }
+}
+
+function navigateBack() {
+  if (navHistory.length === 0) return;
+  const prev = navHistory.pop();
+  navigateTo(prev, false);
 }
 
 // ── MOBILE TAB BAR ────────────────────────────────────
