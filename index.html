@@ -138,6 +138,10 @@
       </div>
 
       <nav class="sidebar-nav">
+        <a href="#" class="nav-item" data-section="dashboard">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
         <span class="nav-section-label">Develop</span>
         <a href="#" class="nav-item active" data-section="ideas">
           <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.6-1.4 4.9-3.5 6.3V17a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-1.7C6.4 13.9 5 11.6 5 9a7 7 0 0 1 7-7z"/></svg>
@@ -183,7 +187,20 @@
     <!-- Main content -->
     <main class="main">
 
-          <!-- ── TASKS ─────────────────────────────── -->
+          <!-- ── DASHBOARD ──────────────────────────── -->
+      <section id="section-dashboard" class="section active">
+        <div class="section-header">
+          <div>
+            <h1 class="section-title">Dashboard</h1>
+            <p class="section-sub">Your pipeline at a glance</p>
+          </div>
+        </div>
+        <div id="dashboard-content">
+          <!-- rendered by JS -->
+        </div>
+      </section>
+
+      <!-- ── TASKS ─────────────────────────────── -->
       <section id="section-tasks" class="section">
         <div class="section-header">
           <div>
@@ -339,7 +356,7 @@
 
 
       <!-- ── IDEAS PARK ──────────────────────────── -->
-      <section id="section-ideas" class="section active">
+      <section id="section-ideas" class="section">
         <div class="section-header">
           <div>
             <h1 class="section-title">Ideas Park</h1>

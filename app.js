@@ -22,7 +22,7 @@ let DB = {
 };
 
 // Active context
-let activeSection     = 'leads';
+let activeSection     = 'dashboard';
 let activeCompanyId   = null;
 let activeProjectId   = null;
 let activeDrawerTab   = 'brief';
@@ -411,6 +411,7 @@ document.querySelectorAll('.tab-item').forEach(item => {
 
 // ── RENDER ALL ──────────────────────────────────────────
 function renderAll() {
+  renderDashboard();
   renderIdeas();
   renderLeads();
   renderProposals();
@@ -450,6 +451,7 @@ function leadCardHTML(lead) {
         <span class="lead-card-value">${formatCurrency(lead.value, lead.currency)}</span>
         <div class="lead-card-actions">
           <button class="card-action-btn" onclick="editLead('${lead.id}'); event.stopPropagation();">Edit</button>
+          <button class="card-action-btn convert" onclick="convertLeadToProposal('${lead.id}'); event.stopPropagation();" title="Convert to Proposal">→ Proposal</button>
           <button class="card-action-btn danger" onclick="deleteLead('${lead.id}'); event.stopPropagation();">Delete</button>
         </div>
       </div>
@@ -1139,6 +1141,138 @@ window.deleteDoc = async (id) => {
   await persist('projects', p);
   renderDocs(p);
   showToast('Document removed');
+};
+
+
+// ── DASHBOARD ──────────────────────────────────────────
+function renderDashboard() {
+  const el = document.getElementById('dashboard-content');
+  if (!el) return;
+
+  const pipelineValue = DB.leads.reduce((s, l) => s + (parseFloat(l.value) || 0), 0);
+  const activeProjects = DB.projects.filter(p => p.status !== 'Wrapped').length;
+  const today = new Date().toISOString().slice(0, 10);
+  const overdueTasks = DB.tasks.filter(t => !t.done && t.due && t.due < today).length;
+  const dueSoon = DB.tasks.filter(t => {
+    if (t.done || !t.due) return false;
+    const diff = (new Date(t.due) - new Date(today)) / 86400000;
+    return diff >= 0 && diff <= 7;
+  }).length;
+
+  const stageOrder = ['Enquiry','Proposal','Negotiation','Confirmed','Lost'];
+  const byStage = stageOrder.map(s => ({
+    stage: s,
+    count: DB.leads.filter(l => l.stage === s).length,
+    value: DB.leads.filter(l => l.stage === s).reduce((sum, l) => sum + (parseFloat(l.value) || 0), 0),
+  }));
+
+  const recentLeads = DB.leads.slice(0, 4);
+  const upcomingMilestones = [];
+  DB.projects.forEach(p => {
+    (p.milestones || []).forEach(m => {
+      if (m.date >= today) upcomingMilestones.push({ ...m, project: p.name });
+    });
+  });
+  upcomingMilestones.sort((a, b) => a.date.localeCompare(b.date));
+  const nextMilestones = upcomingMilestones.slice(0, 5);
+
+  el.innerHTML = `
+    <div class="dash-kpis">
+      <div class="dash-kpi">
+        <div class="dash-kpi-value">${formatCurrency(pipelineValue, 'GBP')}</div>
+        <div class="dash-kpi-label">Total Pipeline</div>
+      </div>
+      <div class="dash-kpi">
+        <div class="dash-kpi-value">${DB.leads.length}</div>
+        <div class="dash-kpi-label">Active Leads</div>
+      </div>
+      <div class="dash-kpi">
+        <div class="dash-kpi-value">${activeProjects}</div>
+        <div class="dash-kpi-label">Active Projects</div>
+      </div>
+      <div class="dash-kpi ${overdueTasks > 0 ? 'dash-kpi--alert' : ''}">
+        <div class="dash-kpi-value">${overdueTasks}</div>
+        <div class="dash-kpi-label">Overdue Tasks</div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="dash-panel">
+        <div class="dash-panel-title">Pipeline by Stage</div>
+        ${byStage.map(s => s.count > 0 ? `
+          <div class="dash-stage-row">
+            <span class="dash-stage-name">${s.stage}</span>
+            <span class="dash-stage-count">${s.count}</span>
+            <span class="dash-stage-value">${formatCurrency(s.value, 'GBP')}</span>
+          </div>` : '').join('')}
+      </div>
+
+      <div class="dash-panel">
+        <div class="dash-panel-title">Recent Leads</div>
+        ${recentLeads.length ? recentLeads.map(l => `
+          <div class="dash-lead-row" onclick="navigateTo('leads')" style="cursor:pointer;">
+            <div>
+              <div class="dash-lead-name">${l.name}</div>
+              <div class="dash-lead-meta">${l.venue || '—'}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0;">
+              <div class="dash-lead-value">${formatCurrency(l.value, l.currency)}</div>
+              <div class="dash-lead-stage">${l.stage}</div>
+            </div>
+          </div>`).join('') : '<div class="dash-empty">No leads yet</div>'}
+      </div>
+
+      <div class="dash-panel">
+        <div class="dash-panel-title">Upcoming Milestones</div>
+        ${nextMilestones.length ? nextMilestones.map(m => `
+          <div class="dash-milestone-row">
+            <div>
+              <div class="dash-milestone-title">${m.title}</div>
+              <div class="dash-milestone-project">${m.project}</div>
+            </div>
+            <div class="dash-milestone-date">${formatDate(m.date)}</div>
+          </div>`).join('') : '<div class="dash-empty">No upcoming milestones</div>'}
+      </div>
+
+      <div class="dash-panel">
+        <div class="dash-panel-title">Tasks Due This Week ${dueSoon > 0 ? `<span class="dash-badge">${dueSoon}</span>` : ''}</div>
+        ${DB.tasks.filter(t => {
+          if (t.done || !t.due) return false;
+          const diff = (new Date(t.due) - new Date(today)) / 86400000;
+          return diff >= 0 && diff <= 7;
+        }).slice(0, 5).map(t => `
+          <div class="dash-task-row">
+            <span class="dash-task-title">${t.title}</span>
+            <span class="dash-task-due ${t.due < today ? 'overdue' : ''}">${formatDate(t.due)}</span>
+          </div>`).join('') || '<div class="dash-empty">All clear this week</div>'}
+      </div>
+    </div>
+  `;
+}
+
+// ── PIPELINE: Convert Lead → Proposal ─────────────────
+window.convertLeadToProposal = (leadId) => {
+  const lead = DB.leads.find(l => l.id === leadId);
+  if (!lead) return;
+
+  // Pre-fill proposal form from lead data
+  document.getElementById('proposal-id').value        = '';
+  document.getElementById('proposal-modal-title').textContent = 'New Proposal';
+  document.getElementById('proposal-title').value     = `General Management — ${lead.name}`;
+  document.getElementById('proposal-client').value    = lead.contact || '';
+  document.getElementById('proposal-status').value    = 'Draft';
+  document.getElementById('proposal-intro').value     = '';
+  document.getElementById('proposal-investment').value = '';
+  proposalPhases = [
+    { name: 'Development & Planning', fee: 0 },
+    { name: 'Pre-Production', fee: 0 },
+    { name: 'Production', fee: 0 },
+    { name: 'Wrap & Reconciliation', fee: 0 },
+  ];
+  renderPhases();
+  populateLeadSelect(lead.id);
+  navigateTo('proposals');
+  openModal('proposal-modal');
 };
 
 // ── BOOT ───────────────────────────────────────────────
@@ -2172,6 +2306,7 @@ document.addEventListener('keydown', (e) => {
 // MOBILE TOP BAR + GROUPED TAB BAR WITH TRAYS
 // ══════════════════════════════════════════════════════
 const SECTION_TITLES = {
+    dashboard: 'Dashboard',
   ideas: 'Ideas Park', leads: 'Leads', proposals: 'Proposals',
   clients: 'Clients', projects: 'Projects', tasks: 'Tasks',
 };
