@@ -2779,3 +2779,40 @@ html, body {
 @media (max-width: 768px) {
   .fab-container { display: none !important; }
 }
+
+/* ── Mobile: Leads kanban → stacked single column ── */
+@media (max-width: 768px) {
+  .kanban {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+  }
+  .kanban-col {
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    min-height: 0 !important;
+  }
+  /* Stage label becomes a slim section divider */
+  .kanban-col-header {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: none !important;
+    padding: 16px 0 6px !important;
+  }
+  .kanban-col-title {
+    font-size: 11px !important;
+    color: var(--text-muted) !important;
+  }
+  .kanban-cards {
+    padding: 0 !important;
+    gap: 8px !important;
+  }
+  /* Cards fill full width with proper shape */
+  .lead-card {
+    border-radius: 12px !important;
+    padding: 14px 16px !important;
+  }
+  .lead-card-footer {
+    margin-top: 10px;
+  }
+}
