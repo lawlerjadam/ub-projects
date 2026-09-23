@@ -809,6 +809,7 @@ window.editClient = (id) => {
   document.getElementById('client-website').value = c.website || '';
   document.getElementById('client-notes').value   = c.notes || '';
   openModal('client-modal');
+  setTimeout(() => renderLinkedTasks('client', id, 'client-tasks-list', 'client-add-task-btn'), 0);
 };
 
 // Contact modal
@@ -1587,7 +1588,7 @@ document.querySelectorAll('.tasks-filter').forEach(btn => {
 // ── Task modal ──
 let editingTaskId = null;
 
-function openTaskModal(taskId = null) {
+function openTaskModal(taskId = null, preLinkedType = null, preLinkedId = null) {
   editingTaskId = taskId;
   const form = document.getElementById('task-form');
   form.reset();
@@ -1628,8 +1629,17 @@ function openTaskModal(taskId = null) {
   } else {
     // Default due date to today
     document.getElementById('task-due-date').value = new Date().toISOString().slice(0, 10);
-    linkedTypeEl.value = '';
-    linkedIdGroup.style.display = 'none';
+    if (preLinkedType) {
+      linkedTypeEl.value = preLinkedType;
+      linkedTypeEl.onchange();
+      if (preLinkedId) {
+        // Wait for options to be populated
+        linkedIdEl.value = preLinkedId;
+      }
+    } else {
+      linkedTypeEl.value = '';
+      linkedIdGroup.style.display = 'none';
+    }
   }
 
   openModal('task-modal');
@@ -1693,3 +1703,150 @@ if (DB.leads.length) {
   renderTasks();
   updateTasksCount();
 }
+
+
+// ══════════════════════════════════════════════════════
+// PHASE 2 — RECORD-LINKED TASKS
+// ══════════════════════════════════════════════════════
+
+function taskCountChip(linkedType, linkedId) {
+  const count = DB.tasks.filter(t => t.linked_type === linkedType && t.linked_id === linkedId && t.status !== 'Done').length;
+  if (!count) return '';
+  return `<span class="task-count-chip">${count} task${count > 1 ? 's' : ''}</span>`;
+}
+
+function linkedTaskRowHTML(task) {
+  const overdue = isOverdue(task.due_date, task.status);
+  const today   = isToday(task.due_date);
+  const dueClass = overdue ? 'due-overdue' : today ? 'due-today' : '';
+  return `
+    <div class="linked-task-row ${task.status === 'Done' ? 'is-done' : ''}" data-id="${task.id}">
+      <input type="checkbox" class="linked-task-check" data-id="${task.id}" ${task.status === 'Done' ? 'checked' : ''}>
+      <div class="linked-task-body">
+        <div class="linked-task-title">${task.title}</div>
+        <div class="linked-task-meta">
+          <span class="${taskTypeBadgeClass(task.type)}">${task.type}</span>
+          ${task.due_date ? `<span class="linked-task-due ${dueClass}">${taskDueLabel(task)}</span>` : ''}
+        </div>
+      </div>
+      <button class="linked-task-edit" data-id="${task.id}" title="Edit">✎</button>
+    </div>`;
+}
+
+function renderLinkedTasks(linkedType, linkedId, listElId, addBtnId) {
+  const listEl = document.getElementById(listElId);
+  const addBtn = document.getElementById(addBtnId);
+  if (!listEl) return;
+
+  const tasks = DB.tasks.filter(t => t.linked_type === linkedType && t.linked_id === linkedId);
+  if (!tasks.length) {
+    listEl.innerHTML = '<div class="linked-tasks-empty">No tasks yet</div>';
+  } else {
+    listEl.innerHTML = tasks.map(linkedTaskRowHTML).join('');
+  }
+
+  // Checkbox toggle
+  listEl.querySelectorAll('.linked-task-check').forEach(cb => {
+    cb.addEventListener('change', async () => {
+      const task = DB.tasks.find(t => t.id === cb.dataset.id);
+      if (!task) return;
+      task.status = cb.checked ? 'Done' : 'Pending';
+      await persist('tasks', task);
+      renderLinkedTasks(linkedType, linkedId, listElId, addBtnId);
+      renderTasks();
+      updateTasksCount();
+    });
+  });
+
+  // Edit buttons
+  listEl.querySelectorAll('.linked-task-edit').forEach(btn => {
+    btn.addEventListener('click', () => openTaskModal(btn.dataset.id));
+  });
+
+  // Add task button
+  if (addBtn) {
+    // Remove old listener by replacing node
+    const newBtn = addBtn.cloneNode(true);
+    addBtn.parentNode.replaceChild(newBtn, addBtn);
+    newBtn.addEventListener('click', () => {
+      openTaskModal(null, linkedType, linkedId);
+      // After modal closes, re-render — we hook via a one-time callback
+      const origClose = window._taskModalCallback;
+      window._taskModalCallback = () => {
+        renderLinkedTasks(linkedType, linkedId, listElId, newBtn.id);
+        if (origClose) origClose();
+      };
+    });
+  }
+}
+
+// ── Lead drawer ─────────────────────────────────────────────────────────────
+
+let activeLeadId = null;
+
+window.openLeadDrawer = function(id) {
+  activeLeadId = id;
+  const lead = DB.leads.find(l => l.id === id);
+  if (!lead) return;
+
+  document.getElementById('lead-drawer-name').textContent = lead.name;
+  document.getElementById('lead-drawer-meta').innerHTML =
+    `${typeBadge(lead.type)} <span style="color:var(--text-muted)">${lead.venue || ''}</span>`;
+
+  // Notes tab
+  const notesEl = document.getElementById('lead-drawer-notes');
+  notesEl.textContent = lead.notes || '';
+  notesEl.style.color = lead.notes ? '' : 'var(--text-muted)';
+
+  // Tasks tab
+  renderLinkedTasks('lead', id, 'lead-tasks-list', 'lead-add-task-btn');
+
+  // Switch to notes tab by default
+  switchLeadDrawerTab('lead-notes');
+
+  document.getElementById('lead-drawer').classList.remove('hidden');
+};
+
+function switchLeadDrawerTab(tab) {
+  document.querySelectorAll('#lead-drawer .drawer-tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('#lead-drawer .drawer-tab-panel').forEach(p =>
+    p.classList.toggle('active', p.id === `tab-${tab}`));
+}
+
+document.querySelectorAll('#lead-drawer .drawer-tab').forEach(tab => {
+  tab.addEventListener('click', () => switchLeadDrawerTab(tab.dataset.tab));
+});
+
+document.getElementById('lead-drawer-close-btn').addEventListener('click', () => {
+  document.getElementById('lead-drawer').classList.add('hidden');
+  activeLeadId = null;
+});
+
+document.getElementById('lead-drawer').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('lead-drawer')) {
+    document.getElementById('lead-drawer').classList.add('hidden');
+    activeLeadId = null;
+  }
+});
+
+document.getElementById('lead-drawer-edit-btn').addEventListener('click', () => {
+  if (activeLeadId) editLead(activeLeadId);
+});
+
+// ── Task modal callback hook ─────────────────────────────────────────────────
+// Re-render linked tasks after task save
+// Patch task form submit to fire callback
+const taskForm = document.getElementById('task-form');
+const _origTaskSubmit = taskForm.onsubmit;
+taskForm.addEventListener('submit', () => {
+  setTimeout(() => {
+    if (window._taskModalCallback) {
+      window._taskModalCallback();
+    }
+    // Re-render linked tasks in open drawers/modals
+    if (activeLeadId) renderLinkedTasks('lead', activeLeadId, 'lead-tasks-list', 'lead-add-task-btn');
+    if (activeProjectId) renderLinkedTasks('project', activeProjectId, 'project-tasks-list', 'project-add-task-btn');
+  }, 50);
+});
+

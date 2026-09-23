@@ -376,6 +376,14 @@
           <textarea id="proposal-investment" rows="3" placeholder="e.g. All fees are subject to VAT at the prevailing rate. Payment terms 30 days from invoice…"></textarea>
         </div>
 
+        <!-- Tasks sub-section -->
+        <div class="modal-tasks-section">
+          <div class="modal-tasks-header">
+            <span class="modal-tasks-label">Tasks</span>
+            <button type="button" class="btn btn-sm btn-outline" id="proposal-add-task-btn">+ Add Task</button>
+          </div>
+          <div id="proposal-tasks-list" class="linked-tasks-list linked-tasks-list--inline"></div>
+        </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-outline" data-modal="proposal-modal">Cancel</button>
           <button type="button" class="btn btn-outline" id="proposal-preview-btn">Preview PDF</button>
@@ -430,6 +438,14 @@
         <div class="field-group">
           <label for="client-notes">Notes</label>
           <textarea id="client-notes" rows="2" placeholder="Any context about this company…"></textarea>
+        </div>
+        <!-- Tasks sub-section -->
+        <div class="modal-tasks-section">
+          <div class="modal-tasks-header">
+            <span class="modal-tasks-label">Tasks</span>
+            <button type="button" class="btn btn-sm btn-outline" id="client-add-task-btn">+ Add Task</button>
+          </div>
+          <div id="client-tasks-list" class="linked-tasks-list linked-tasks-list--inline"></div>
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-outline" data-modal="client-modal">Cancel</button>
@@ -565,6 +581,7 @@
         <button class="drawer-tab active" data-tab="brief">Brief</button>
         <button class="drawer-tab" data-tab="timeline">Timeline</button>
         <button class="drawer-tab" data-tab="docs">Docs</button>
+        <button class="drawer-tab" data-tab="tasks">Tasks</button>
       </div>
 
       <div class="drawer-body">
@@ -588,6 +605,43 @@
             <button class="btn btn-sm btn-outline" id="add-doc-btn">+ Add Doc</button>
           </div>
           <div id="docs-list" class="docs-list"></div>
+        </div>
+
+        <!-- Tasks tab -->
+        <div class="drawer-tab-panel" id="tab-tasks">
+          <div id="project-tasks-list" class="linked-tasks-list"></div>
+          <button class="btn btn-sm btn-outline linked-tasks-add" id="project-add-task-btn">+ Add Task</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lead detail drawer -->
+  <div id="lead-drawer" class="drawer-overlay hidden">
+    <div class="drawer">
+      <div class="drawer-header">
+        <div>
+          <h2 class="drawer-title" id="lead-drawer-name"></h2>
+          <div class="drawer-meta" id="lead-drawer-meta"></div>
+        </div>
+        <div class="drawer-header-actions">
+          <button class="btn btn-sm btn-outline" id="lead-drawer-edit-btn">Edit</button>
+          <button class="drawer-close" id="lead-drawer-close-btn">×</button>
+        </div>
+      </div>
+      <div class="drawer-tabs">
+        <button class="drawer-tab active" data-tab="lead-notes">Notes</button>
+        <button class="drawer-tab" data-tab="lead-tasks">Tasks</button>
+      </div>
+      <div class="drawer-body">
+        <!-- Notes tab -->
+        <div class="drawer-tab-panel active" id="tab-lead-notes">
+          <div id="lead-drawer-notes" class="lead-notes-display"></div>
+        </div>
+        <!-- Tasks tab -->
+        <div class="drawer-tab-panel" id="tab-lead-tasks">
+          <div id="lead-tasks-list" class="linked-tasks-list"></div>
+          <button class="btn btn-sm btn-outline linked-tasks-add" id="lead-add-task-btn">+ Add Task</button>
         </div>
       </div>
     </div>
