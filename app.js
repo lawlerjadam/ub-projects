@@ -1264,13 +1264,13 @@ function renderDashboard() {
         <div class="dash-kpi-value">${formatCompact(pipelineValue, 'GBP')}</div>
         <div class="dash-kpi-label">Total Pipeline</div>
       </div>
-      <div class="dash-kpi dash-kpi--link" onclick="navigateTo('leads')" title="View all leads">
-        <div class="dash-kpi-value">${DB.leads.length}</div>
-        <div class="dash-kpi-label">Active Leads</div>
-      </div>
       <div class="dash-kpi dash-kpi--link" onclick="navigateTo('leads')" title="Probability-weighted forecast">
         <div class="dash-kpi-value">${formatCompact(weightedPipeline, 'GBP')}</div>
         <div class="dash-kpi-label">Weighted Forecast</div>
+      </div>
+      <div class="dash-kpi dash-kpi--link" onclick="navigateTo('leads')" title="View all leads">
+        <div class="dash-kpi-value">${DB.leads.length}</div>
+        <div class="dash-kpi-label">Active Leads</div>
       </div>
       <div class="dash-kpi dash-kpi--link" onclick="navigateTo('projects')" title="View all projects">
         <div class="dash-kpi-value">${activeProjects}</div>
