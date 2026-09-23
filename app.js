@@ -1191,6 +1191,7 @@ document.getElementById('inspire-add-btn').addEventListener('click', () => {
     source: 'Inspired',
   };
   DB.ideas.push(newIdea);
+  persist('ideas', newIdea);
   closeModal('inspire-modal');
   renderIdeas();
   showToast('Idea added to Ideas Park 🐄');
