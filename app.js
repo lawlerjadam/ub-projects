@@ -2074,3 +2074,84 @@ function renderTasksAndCal() {
   }
 }
 
+
+// ══════════════════════════════════════════════════════
+// EASTER EGG — Spin the Wheel
+// ══════════════════════════════════════════════════════
+const EGG_CONCEPTS = [
+  'Late-night jazz festival',
+  'Immersive theatre season',
+  'Rooftop comedy club',
+  'Underground drag cabaret',
+  'Multi-day folk festival',
+  'Street food & live music market',
+  'Classic film & live score event',
+  'Midnight circus spectacular',
+  'Open-air opera',
+  'Spoken word & poetry slam',
+  'Electronic music weekender',
+  'Site-specific dance festival',
+  'International puppetry festival',
+  'Comedy & craft beer festival',
+  'One-night immersive rave',
+  'Family circus festival',
+  'Outdoor Shakespeare season',
+  'Dark tourism theatre trail',
+  'Improv & sketch comedy marathon',
+  'Night-time botanical garden experience',
+  'Experimental noise & art festival',
+  'Burlesque & variety show',
+  'Floating stage river festival',
+  'Secret supper club with live performance',
+  'Winter light & fire festival',
+];
+
+const EGG_PLACES = [
+  'in Reykjavik', 'on a rooftop in Lisbon', 'in a Glasgow car park',
+  'in a Belfast shipyard', 'under the arches in Manchester',
+  'on a ferry in Stockholm', 'in a decommissioned power station in Berlin',
+  'in a vineyard in the Douro Valley', 'on a beach in Thessaloniki',
+  'in a converted warehouse in Rotterdam', 'in a castle in Kraków',
+  'in the middle of a cornfield in Iowa', 'on the roof of a multi-storey in Bristol',
+  'in a quarry in Wales', 'in a brutalist car park in Peckham',
+  'in a botanical garden in Singapore', 'on a barge in Amsterdam',
+  'in a desert canyon in New Mexico', 'in an abandoned factory in Detroit',
+  'on a Croatian island', 'in a forest in Scandinavia',
+  'in a salt flat in Bolivia', 'in a cathedral crypt in Vienna',
+  'on a rooftop in Seoul', 'in a lido in South London',
+  'in a lighthouse on the Scottish coast',
+];
+
+function spinWheel() {
+  const concept = EGG_CONCEPTS[Math.floor(Math.random() * EGG_CONCEPTS.length)];
+  const place   = EGG_PLACES[Math.floor(Math.random() * EGG_PLACES.length)];
+
+  const conceptEl = document.getElementById('egg-concept');
+  const whereEl   = document.getElementById('egg-where');
+
+  // quick flash animation
+  conceptEl.classList.remove('spinning');
+  whereEl.classList.remove('spinning');
+  void conceptEl.offsetWidth; // reflow
+  conceptEl.classList.add('spinning');
+  whereEl.classList.add('spinning');
+
+  conceptEl.textContent = concept;
+  whereEl.textContent   = place;
+}
+
+function openEgg() {
+  spinWheel();
+  document.getElementById('egg-overlay').classList.remove('hidden');
+}
+
+function closeEgg() {
+  document.getElementById('egg-overlay').classList.add('hidden');
+}
+
+document.getElementById('cowhead-btn').addEventListener('click', openEgg);
+
+// Also close on Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeEgg();
+});

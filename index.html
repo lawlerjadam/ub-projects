@@ -75,7 +75,7 @@
     <aside class="sidebar">
       <div class="sidebar-header">
         <div class="sidebar-logo">
-          <img src="ub-icon.png" style="width:36px;height:36px;flex-shrink:0;filter:brightness(0) invert(1);" alt="Underbelly">
+          <img src="ub-icon.png" id="cowhead-btn" style="width:36px;height:36px;flex-shrink:0;filter:brightness(0) invert(1);cursor:pointer;" alt="Underbelly" title="🐄">
 
         </div>
       </div>
@@ -962,5 +962,18 @@
       });
     }
   </script>
+
+  <!-- Easter Egg: Spin the Wheel -->
+  <div id="egg-overlay" class="egg-overlay hidden" onclick="closeEgg()">
+    <div class="egg-card" onclick="event.stopPropagation()">
+      <button class="egg-close" onclick="closeEgg()">✕</button>
+      <div class="egg-moo">🐄</div>
+      <p class="egg-label">WHAT IF YOU DID A…</p>
+      <div class="egg-concept" id="egg-concept"></div>
+      <p class="egg-where" id="egg-where"></p>
+      <button class="btn btn-primary egg-spin-btn" id="egg-spin-btn" onclick="spinWheel()">Spin again ↻</button>
+    </div>
+  </div>
+
 </body>
 </html>
