@@ -34,56 +34,56 @@ const SEED = {
     {
       id: 'lead-1', name: 'The Last Light of Alba', type: 'Theatre',
       venue: 'Traverse Theatre, Edinburgh', contact: 'Flora Dunbar',
-      value: 42000, currency: 'GBP', stage: 'Negotiation',
+      value: 42000, currency: 'GBP', stage: 'Negotiation', probability: 70,
       source: 'Edinburgh Festivals Office', created_at: '2026-08-10',
       notes: 'Scottish touring production. Traverse keen to co-produce. Arts Council Scotland interest flagged.'
     },
     {
       id: 'lead-2', name: 'Midnight Carnival', type: 'Festival',
       venue: 'Underbelly, George Square, Edinburgh', contact: 'Jamie Carmichael',
-      value: 185000, currency: 'GBP', stage: 'Confirmed',
+      value: 185000, currency: 'GBP', stage: 'Confirmed', probability: 95,
       source: 'Internal — Edinburgh Fringe programme', created_at: '2026-07-22',
       notes: 'Multi-venue late-night circus programme. Running Aug 2027. Headliner TBC.'
     },
     {
       id: 'lead-3', name: 'Peckham Pulse', type: 'Live Event',
       venue: 'Bussey Building, Peckham, London', contact: 'Dara Osei',
-      value: 28500, currency: 'GBP', stage: 'Proposal',
+      value: 28500, currency: 'GBP', stage: 'Proposal', probability: 40,
       source: 'Inbound – venue referral', created_at: '2026-09-01',
       notes: '3-night immersive music event. South London community arts focus.'
     },
     {
       id: 'lead-4', name: 'The Moth & The Flame', type: 'Theatre',
       venue: 'Brighton Dome, Brighton', contact: 'Cressida Howell',
-      value: 67000, currency: 'GBP', stage: 'Enquiry',
+      value: 67000, currency: 'GBP', stage: 'Enquiry', probability: 20,
       source: 'Producer network — SXSW London showcase', created_at: '2026-09-15',
       notes: 'New writing from Oran Mor. Brighton transfer of sold-out Glasgow run.'
     },
     {
       id: 'lead-5', name: 'Silk Road Stories', type: 'Cultural Experience',
       venue: 'Barbican Centre, London', contact: 'Mei-Lin Zhao',
-      value: 210000, currency: 'GBP', stage: 'Negotiation',
+      value: 210000, currency: 'GBP', stage: 'Negotiation', probability: 75,
       source: 'Arts Council England strategic touring', created_at: '2026-08-28',
       notes: 'Multi-disciplinary cultural programme touring UK/EU 2027–28. Partnership with Barbican and HOME Manchester.'
     },
     {
       id: 'lead-6', name: 'Northern Stage Grand Tour', type: 'Tour',
       venue: 'Multiple — Newcastle, Leeds, Hull, Sheffield', contact: 'Patrick Whitley',
-      value: 95000, currency: 'GBP', stage: 'Proposal',
+      value: 95000, currency: 'GBP', stage: 'Proposal', probability: 50,
       source: 'Northern Stage partnership', created_at: '2026-09-08',
       notes: 'Four-city regional tour of Northern Stage co-production. Levelling Up arts fund application in progress.'
     },
     {
       id: 'lead-7', name: 'VAULT Festival 2028', type: 'Festival',
       venue: 'The Vaults, Waterloo, London', contact: 'Simone Archer',
-      value: 320000, currency: 'GBP', stage: 'Enquiry',
+      value: 320000, currency: 'GBP', stage: 'Enquiry', probability: 25,
       source: 'Industry — VAULT closing night 2026', created_at: '2026-09-18',
       notes: 'Underbelly approached to take on GM/production oversight for 2028 edition. Decision pending internal review.'
     },
     {
       id: 'lead-8', name: 'Americana Roadhouse', type: 'Live Event',
       venue: 'Nashville, TN / Brooklyn Bowl, Las Vegas', contact: 'Billy Ray Tanner',
-      value: 145000, currency: 'USD', stage: 'Enquiry',
+      value: 145000, currency: 'USD', stage: 'Enquiry', probability: 15,
       source: 'US agent — William Morris Nashville', created_at: '2026-09-20',
       notes: 'US country/Americana touring package. Early-stage conversations with WME.'
     },
@@ -250,6 +250,11 @@ const formatCurrency = (val, currency = 'GBP') => {
   return sym + Number(val).toLocaleString('en-GB');
 };
 
+function updateProbabilityDisplay(val) {
+  const lbl = document.getElementById('lead-probability-display');
+  if (lbl) lbl.textContent = val + '%';
+}
+
 const formatCompact = (val, currency = 'GBP') => {
   const sym = currency === 'USD' ? '$' : '£';
   if (!val) return '—';
@@ -265,6 +270,8 @@ const formatDate = (iso) => {
     return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
   } catch { return iso; }
 };
+
+const probColor = (p) => p >= 75 ? '#22c55e' : p >= 50 ? '#f59e0b' : p >= 25 ? '#f97316' : '#94a3b8';
 
 const typeBadge = (type) => {
   const map = {
@@ -484,6 +491,7 @@ function leadCardHTML(lead) {
       ${typeBadge(lead.type)}
       <div class="lead-card-footer">
         <span class="lead-card-value">${formatCurrency(lead.value, lead.currency)}</span>
+        ${lead.probability != null ? `<span class="lead-prob-badge" style="background:${probColor(lead.probability)}">${lead.probability}%</span>` : ''}
         <div class="lead-card-actions">
           <button class="card-action-btn" onclick="editLead('${lead.id}'); event.stopPropagation();">Edit</button>
           <button class="card-action-btn convert" onclick="convertLeadToProposal('${lead.id}'); event.stopPropagation();" title="Convert to Proposal">→ Proposal</button>
@@ -512,7 +520,8 @@ document.getElementById('lead-form').addEventListener('submit', async (e) => {
     currency:   document.getElementById('lead-currency').value,
     value:      parseFloat(document.getElementById('lead-value').value) || 0,
     stage:      document.getElementById('lead-stage').value,
-    source:     document.getElementById('lead-source').value.trim(),
+    source:      document.getElementById('lead-source').value.trim(),
+    probability: parseInt(document.getElementById('lead-probability').value) || 0,
     notes:      document.getElementById('lead-notes').value.trim(),
     created_at: new Date().toISOString(),
   };
@@ -539,7 +548,9 @@ window.editLead = (id) => {
   document.getElementById('lead-currency').value = lead.currency || 'GBP';
   document.getElementById('lead-value').value    = lead.value || '';
   document.getElementById('lead-stage').value    = lead.stage;
-  document.getElementById('lead-source').value   = lead.source || '';
+  document.getElementById('lead-source').value       = lead.source || '';
+  document.getElementById('lead-probability').value  = lead.probability ?? 50;
+  updateProbabilityDisplay(lead.probability ?? 50);
   document.getElementById('lead-notes').value    = lead.notes || '';
   openModal('lead-modal');
 };
@@ -1209,6 +1220,7 @@ function renderDashboard() {
   if (!el) return;
 
   const pipelineValue = DB.leads.reduce((s, l) => s + (parseFloat(l.value) || 0), 0);
+  const weightedPipeline = DB.leads.reduce((s, l) => s + (parseFloat(l.value) || 0) * ((l.probability ?? 50) / 100), 0);
   const activeProjects = DB.projects.filter(p => p.status !== 'Wrapped').length;
   const today = new Date().toISOString().slice(0, 10);
   const overdueTasks = DB.tasks.filter(t => t.status !== 'Done' && t.due_date && t.due_date < today).length;
@@ -1223,6 +1235,7 @@ function renderDashboard() {
     stage: s,
     count: DB.leads.filter(l => l.stage === s).length,
     value: DB.leads.filter(l => l.stage === s).reduce((sum, l) => sum + (parseFloat(l.value) || 0), 0),
+    weighted: DB.leads.filter(l => l.stage === s).reduce((sum, l) => sum + (parseFloat(l.value) || 0) * ((l.probability ?? 50) / 100), 0),
   }));
 
   const recentLeads = DB.leads.slice(0, 4);
@@ -1255,6 +1268,10 @@ function renderDashboard() {
         <div class="dash-kpi-value">${DB.leads.length}</div>
         <div class="dash-kpi-label">Active Leads</div>
       </div>
+      <div class="dash-kpi dash-kpi--link" onclick="navigateTo('leads')" title="Probability-weighted forecast">
+        <div class="dash-kpi-value">${formatCompact(weightedPipeline, 'GBP')}</div>
+        <div class="dash-kpi-label">Weighted Forecast</div>
+      </div>
       <div class="dash-kpi dash-kpi--link" onclick="navigateTo('projects')" title="View all projects">
         <div class="dash-kpi-value">${activeProjects}</div>
         <div class="dash-kpi-label">Active Projects</div>
@@ -1272,7 +1289,8 @@ function renderDashboard() {
           <div class="dash-stage-row dash-stage-row--link" onclick="navigateTo('leads')" title="View ${s.stage} leads">
             <span class="dash-stage-name">${s.stage}</span>
             <span class="dash-stage-count">${s.count}</span>
-            <span class="dash-stage-value">${formatCurrency(s.value, 'GBP')}</span>
+            <span class="dash-stage-value">${formatCompact(s.value, 'GBP')}</span>
+            <span class="dash-stage-weighted" title="Weighted value">${formatCompact(s.weighted, 'GBP')}</span>
           </div>` : '').join('')}
       </div>
 
@@ -2067,8 +2085,12 @@ window.openLeadDrawer = function(id) {
   if (!lead) return;
 
   document.getElementById('lead-drawer-name').textContent = lead.name;
+  const probVal = lead.probability ?? null;
+  const probPill = probVal != null
+    ? `<span style="background:${probColor(probVal)};color:#fff;border-radius:999px;padding:2px 8px;font-size:0.75rem;font-weight:600;">${probVal}% likely</span>`
+    : '';
   document.getElementById('lead-drawer-meta').innerHTML =
-    `${typeBadge(lead.type)} <span style="color:var(--text-muted)">${lead.venue || ''}</span>`;
+    `${typeBadge(lead.type)} ${probPill} <span style="color:var(--text-muted)">${lead.venue || ''}</span>`;
 
   // Notes tab
   const notesEl = document.getElementById('lead-drawer-notes');

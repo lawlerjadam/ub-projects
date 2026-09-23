@@ -3087,3 +3087,32 @@ html, body {
 }
 .lead-proposal-row:hover { background: var(--hover-bg, rgba(100,0,140,0.06)); }
 
+
+
+/* ── Probability badge on lead cards ── */
+.lead-prob-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+/* ── Weighted column in Pipeline by Stage ── */
+.dash-stage-weighted {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted, #9ca3af);
+  text-align: right;
+  min-width: 64px;
+  white-space: nowrap;
+}
+.dash-stage-row .dash-stage-value {
+  min-width: 64px;
+  text-align: right;
+  white-space: nowrap;
+}
