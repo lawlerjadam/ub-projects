@@ -2966,3 +2966,46 @@ html, body {
 
 /* Convert proposal button */
 .btn-ghost.convert-btn { color: var(--ub-purple); font-weight: 600; }
+
+/* Search input */
+.section-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.search-input {
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card-bg);
+  color: var(--text);
+  font-size: 0.875rem;
+  width: 200px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.search-input:focus {
+  border-color: var(--ub-purple);
+  box-shadow: 0 0 0 3px rgba(100,0,140,0.12);
+}
+@media (max-width: 768px) {
+  .search-input { width: 140px; }
+  .section-header-right { gap: 6px; }
+}
+
+/* Clickable dashboard elements */
+.dash-kpi--link {
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+.dash-kpi--link:hover {
+  border-color: var(--ub-purple);
+  box-shadow: 0 2px 8px rgba(100,0,140,0.12);
+  transform: translateY(-1px);
+}
+.dash-stage-row--link { cursor: pointer; transition: background 0.12s; border-radius: 6px; padding-left: 4px; padding-right: 4px; }
+.dash-stage-row--link:hover { background: var(--bg-muted); }
+.dash-milestone-row--link { cursor: pointer; transition: background 0.12s; border-radius: 6px; }
+.dash-milestone-row--link:hover { background: var(--bg-muted); }
+.dash-task-row--link { cursor: pointer; transition: background 0.12s; border-radius: 6px; }
+.dash-task-row--link:hover { background: var(--bg-muted); }

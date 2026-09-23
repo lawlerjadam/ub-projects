@@ -893,11 +893,18 @@ window.deleteContact = async (id) => {
 // ══════════════════════════════════════════════════════
 function renderProjects() {
   const grid = document.getElementById('projects-grid');
-  if (!DB.projects.length) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;padding:3rem;"><div class="empty-state-icon">📋</div><p>No projects yet.</p></div>`;
+  const _searchTerm = (document.getElementById('projects-search')?.value || '').toLowerCase();
+  const filteredProjects = _searchTerm
+    ? DB.projects.filter(p =>
+        p.name.toLowerCase().includes(_searchTerm) ||
+        (p.client||'').toLowerCase().includes(_searchTerm) ||
+        (p.venue||'').toLowerCase().includes(_searchTerm))
+    : DB.projects;
+  if (!filteredProjects.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;padding:3rem;"><div class="empty-state-icon">📋</div><p>${_searchTerm ? 'No projects match "' + _searchTerm + '"' : 'No projects yet.'}</p></div>`;
     return;
   }
-  grid.innerHTML = DB.projects.map(p => {
+  grid.innerHTML = filteredProjects.map(p => {
     const dates = p.start_date ? `${formatDate(p.start_date)}${p.end_date ? ' – ' + formatDate(p.end_date) : ''}` : '';
     return `
       <div class="project-card" data-id="${p.id}">
@@ -1193,21 +1200,31 @@ function renderDashboard() {
   upcomingMilestones.sort((a, b) => a.date.localeCompare(b.date));
   const nextMilestones = upcomingMilestones.slice(0, 5);
 
+  // milestone project id lookup
+  const upcomingWithId = [];
+  DB.projects.forEach(p => {
+    (p.milestones || []).forEach(m => {
+      if (m.date >= today) upcomingWithId.push({ ...m, projectName: p.name, projectId: p.id });
+    });
+  });
+  upcomingWithId.sort((a, b) => a.date.localeCompare(b.date));
+  const nextMilestonesClickable = upcomingWithId.slice(0, 5);
+
   el.innerHTML = `
     <div class="dash-kpis">
-      <div class="dash-kpi">
+      <div class="dash-kpi dash-kpi--link" onclick="navigateTo('leads')" title="View all leads">
         <div class="dash-kpi-value">${formatCurrency(pipelineValue, 'GBP')}</div>
         <div class="dash-kpi-label">Total Pipeline</div>
       </div>
-      <div class="dash-kpi">
+      <div class="dash-kpi dash-kpi--link" onclick="navigateTo('leads')" title="View all leads">
         <div class="dash-kpi-value">${DB.leads.length}</div>
         <div class="dash-kpi-label">Active Leads</div>
       </div>
-      <div class="dash-kpi">
+      <div class="dash-kpi dash-kpi--link" onclick="navigateTo('projects')" title="View all projects">
         <div class="dash-kpi-value">${activeProjects}</div>
         <div class="dash-kpi-label">Active Projects</div>
       </div>
-      <div class="dash-kpi ${overdueTasks > 0 ? 'dash-kpi--alert' : ''}">
+      <div class="dash-kpi dash-kpi--link ${overdueTasks > 0 ? 'dash-kpi--alert' : ''}" onclick="navigateTo('tasks')" title="View overdue tasks">
         <div class="dash-kpi-value">${overdueTasks}</div>
         <div class="dash-kpi-label">Overdue Tasks</div>
       </div>
@@ -1217,7 +1234,7 @@ function renderDashboard() {
       <div class="dash-panel">
         <div class="dash-panel-title">Pipeline by Stage</div>
         ${byStage.map(s => s.count > 0 ? `
-          <div class="dash-stage-row">
+          <div class="dash-stage-row dash-stage-row--link" onclick="navigateTo('leads')" title="View ${s.stage} leads">
             <span class="dash-stage-name">${s.stage}</span>
             <span class="dash-stage-count">${s.count}</span>
             <span class="dash-stage-value">${formatCurrency(s.value, 'GBP')}</span>
@@ -1227,7 +1244,7 @@ function renderDashboard() {
       <div class="dash-panel">
         <div class="dash-panel-title">Recent Leads</div>
         ${recentLeads.length ? recentLeads.map(l => `
-          <div class="dash-lead-row" onclick="navigateTo('leads')" style="cursor:pointer;">
+          <div class="dash-lead-row" onclick="openLeadDrawer('${l.id}')" style="cursor:pointer;" title="Open ${l.name}">
             <div>
               <div class="dash-lead-name">${l.name}</div>
               <div class="dash-lead-meta">${l.venue || '—'}</div>
@@ -1241,11 +1258,11 @@ function renderDashboard() {
 
       <div class="dash-panel">
         <div class="dash-panel-title">Upcoming Milestones</div>
-        ${nextMilestones.length ? nextMilestones.map(m => `
-          <div class="dash-milestone-row">
+        ${nextMilestonesClickable.length ? nextMilestonesClickable.map(m => `
+          <div class="dash-milestone-row dash-milestone-row--link" onclick="openProjectDrawer('${m.projectId}')" title="Open ${m.projectName}">
             <div>
               <div class="dash-milestone-title">${m.title}</div>
-              <div class="dash-milestone-project">${m.project}</div>
+              <div class="dash-milestone-project">${m.projectName}</div>
             </div>
             <div class="dash-milestone-date">${formatDate(m.date)}</div>
           </div>`).join('') : '<div class="dash-empty">No upcoming milestones</div>'}
@@ -1258,7 +1275,7 @@ function renderDashboard() {
           const diff = (new Date(t.due_date) - new Date(today)) / 86400000;
           return diff >= 0 && diff <= 7;
         }).slice(0, 5).map(t => `
-          <div class="dash-task-row">
+          <div class="dash-task-row dash-task-row--link" onclick="navigateTo('tasks')" title="${t.title}">
             <span class="dash-task-title">${t.title}</span>
             <span class="dash-task-due ${t.due_date < today ? 'overdue' : ''}">${formatDate(t.due_date)}</span>
           </div>`).join('') || '<div class="dash-empty">All clear this week</div>'}
@@ -1317,6 +1334,11 @@ window.convertProposalToProject = (proposalId) => {
   navigateTo('projects');
   openModal('project-modal');
 };
+
+
+// ── Search ──────────────────────────────────────────────
+document.getElementById('leads-search')?.addEventListener('input', () => renderLeads());
+document.getElementById('projects-search')?.addEventListener('input', () => renderProjects());
 
 // ── BOOT ───────────────────────────────────────────────
 initAuth();

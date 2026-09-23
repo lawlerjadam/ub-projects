@@ -253,7 +253,10 @@
             <h1 class="section-title">Leads</h1>
             <p class="section-sub">Potential productions and events in pipeline</p>
           </div>
-          <button class="btn btn-primary" id="new-lead-btn">+ New Lead</button>
+          <div class="section-header-right">
+            <input type="search" id="leads-search" class="search-input" placeholder="Search leads…" />
+            <button class="btn btn-primary" id="new-lead-btn">+ New Lead</button>
+          </div>
         </div>
 
         <!-- Kanban board -->
@@ -349,7 +352,7 @@
             <h1 class="section-title">Projects</h1>
             <p class="section-sub">Confirmed productions and events</p>
           </div>
-          <button class="btn btn-primary" id="new-project-btn">+ New Project</button>
+          <div class="section-header-right"><input type="search" id="projects-search" class="search-input" placeholder="Search projects…" /><button class="btn btn-primary" id="new-project-btn">+ New Project</button>
         </div>
         <div class="projects-grid" id="projects-grid"></div>
       </section>
