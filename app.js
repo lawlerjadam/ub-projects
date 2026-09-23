@@ -44,8 +44,10 @@ const FX = {
 
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// Kick off FX rate fetch immediately (non-blocking)
-FX.refresh().then(() => { if (typeof renderDashboard === 'function') renderDashboard(); });
+// Kick off FX rate fetch after DOM ready so renderDashboard is defined
+document.addEventListener('DOMContentLoaded', () => {
+  FX.refresh().then(() => { if (typeof renderDashboard === 'function') renderDashboard(); });
+});
 
 // ── LOCAL DB (in-memory, synced from Supabase) ────────
 let DB = {
@@ -542,6 +544,7 @@ function leadCardHTML(lead) {
 document.getElementById('new-lead-btn').addEventListener('click', () => {
   document.getElementById('lead-id').value        = '';
   document.getElementById('lead-form').reset();
+  updateProbabilityDisplay(50);
   document.getElementById('lead-modal-title').textContent = 'New Lead';
   openModal('lead-modal');
 });
@@ -1614,7 +1617,7 @@ document.addEventListener('click', (e) => {
 
 const fabActions = {
   'fab-new-idea':  () => { navigateTo('ideas'); document.getElementById('idea-form').reset(); document.getElementById('idea-form').dataset.editId = ''; document.getElementById('idea-modal-title').textContent = 'New Idea'; openModal('idea-modal'); },
-  'fab-new-lead':  () => { navigateTo('leads'); document.getElementById('lead-form').reset(); document.getElementById('lead-form').dataset.editId = ''; document.getElementById('lead-modal-title').textContent = 'New Lead'; openModal('lead-modal'); },
+  'fab-new-lead':  () => { navigateTo('leads'); document.getElementById('lead-form').reset(); updateProbabilityDisplay(50); document.getElementById('lead-form').dataset.editId = ''; document.getElementById('lead-modal-title').textContent = 'New Lead'; openModal('lead-modal'); },
 };
 
 Object.entries(fabActions).forEach(([id, fn]) => {
