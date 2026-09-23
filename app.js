@@ -490,8 +490,10 @@ function leadCardHTML(lead) {
       <div class="lead-card-venue">${lead.venue || '—'}</div>
       ${typeBadge(lead.type)}
       <div class="lead-card-footer">
-        <span class="lead-card-value">${formatCurrency(lead.value, lead.currency)}</span>
-        ${lead.probability != null ? `<span class="lead-prob-badge" style="background:${probColor(lead.probability)};color:${lead.probability >= 50 ? '#fff' : '#4c1d95'};margin-left:8px;">${lead.probability}%</span>` : ''}
+        <div class="lead-card-footer-top">
+          <span class="lead-card-value">${formatCurrency(lead.value, lead.currency)}</span>
+          ${lead.probability != null ? `<span class="lead-prob-badge" style="background:${probColor(lead.probability)};color:${lead.probability >= 50 ? '#fff' : '#4c1d95'}">${lead.probability}%</span>` : ''}
+        </div>
         <div class="lead-card-actions">
           <button class="card-action-btn" onclick="editLead('${lead.id}'); event.stopPropagation();">Edit</button>
           <button class="card-action-btn convert" onclick="convertLeadToProposal('${lead.id}'); event.stopPropagation();" title="Convert to Proposal">→ Proposal</button>

@@ -570,11 +570,15 @@ html, body {
 
 .lead-card-footer {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 4px;
+  flex-direction: column;
+  gap: 6px;
   margin-top: 0.5rem;
+}
+
+.lead-card-footer-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .lead-card-value {
@@ -588,6 +592,7 @@ html, body {
   gap: 4px;
   opacity: 0;
   transition: opacity var(--transition);
+  width: 100%;
 }
 
 .lead-card:hover .lead-card-actions { opacity: 1; }
