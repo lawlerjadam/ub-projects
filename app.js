@@ -1178,7 +1178,7 @@ document.getElementById('inspire-add-btn').addEventListener('click', () => {
   closeModal('inspire-modal');
   renderIdeas();
   showToast('Idea added to Ideas Park 🐄');
-  document.querySelector('[data-section="ideas"]').click();
+  navigateTo('ideas');
 });
 
 document.getElementById('new-idea-btn').addEventListener('click', () => {
@@ -1256,7 +1256,7 @@ function renderIdeas() {
       document.getElementById('lead-form').dataset.editId = '';
       document.getElementById('lead-form').dataset.fromIdea = idea.id;
       openModal('lead-modal');
-      document.querySelector('[data-section="leads"]').click();
+      navigateTo('leads');
     });
   });
 
@@ -1271,7 +1271,7 @@ function renderIdeas() {
       document.getElementById('project-modal-title').textContent = 'Convert to Project';
       document.getElementById('project-form').dataset.editId = '';
       openModal('project-modal');
-      document.querySelector('[data-section="projects"]').click();
+      navigateTo('projects');
     });
   });
 
@@ -1302,11 +1302,11 @@ document.addEventListener('click', (e) => {
 });
 
 const fabActions = {
-  'fab-new-idea':     () => { document.querySelector('[data-section="ideas"]').click();     openModal('idea-modal'); },
-  'fab-new-lead':     () => { document.querySelector('[data-section="leads"]').click();     document.getElementById('new-lead-btn').click(); },
-  'fab-new-proposal': () => { document.querySelector('[data-section="proposals"]').click(); document.getElementById('new-proposal-btn').click(); },
-  'fab-new-client':   () => { document.querySelector('[data-section="clients"]').click();   document.getElementById('new-client-btn').click(); },
-  'fab-new-project':  () => { document.querySelector('[data-section="projects"]').click();  document.getElementById('new-project-btn').click(); },
+  'fab-new-idea':     () => { navigateTo('ideas');     document.getElementById('idea-form').reset(); document.getElementById('idea-form').dataset.editId = ''; document.getElementById('idea-modal-title').textContent = 'New Idea'; openModal('idea-modal'); },
+  'fab-new-lead':     () => { navigateTo('leads');     document.getElementById('lead-form').reset(); document.getElementById('lead-form').dataset.editId = ''; document.getElementById('lead-modal-title').textContent = 'New Lead'; openModal('lead-modal'); },
+  'fab-new-proposal': () => { navigateTo('proposals'); document.getElementById('proposal-form').reset(); document.getElementById('proposal-form').dataset.editId = ''; document.getElementById('proposal-modal-title').textContent = 'New Proposal'; openModal('proposal-modal'); },
+  'fab-new-client':   () => { navigateTo('clients');   document.getElementById('client-form').reset(); document.getElementById('client-form').dataset.editId = ''; document.getElementById('client-modal-title').textContent = 'New Company'; openModal('client-modal'); },
+  'fab-new-project':  () => { navigateTo('projects');  document.getElementById('project-form').reset(); document.getElementById('project-form').dataset.editId = ''; document.getElementById('project-modal-title').textContent = 'New Project'; openModal('project-modal'); },
 };
 
 Object.entries(fabActions).forEach(([id, fn]) => {
