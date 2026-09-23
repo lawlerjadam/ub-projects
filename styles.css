@@ -2829,13 +2829,18 @@ html, body {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 20px 24px;
+  min-height: 96px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .dash-kpi--alert .dash-kpi-value { color: #e53e3e; }
 .dash-kpi-value {
-  font-size: 1.75rem;
+  font-size: clamp(1.3rem, 4vw, 1.75rem);
   font-weight: 700;
   color: var(--ub-purple);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .dash-kpi-label {
   font-size: 0.78rem;

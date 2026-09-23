@@ -250,6 +250,15 @@ const formatCurrency = (val, currency = 'GBP') => {
   return sym + Number(val).toLocaleString('en-GB');
 };
 
+const formatCompact = (val, currency = 'GBP') => {
+  const sym = currency === 'USD' ? '$' : '£';
+  if (!val) return '—';
+  const n = Number(val);
+  if (n >= 1_000_000) return sym + (n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1) + 'M';
+  if (n >= 1_000)     return sym + (n / 1_000).toFixed(n % 1_000 === 0 ? 0 : 1) + 'k';
+  return sym + n.toLocaleString('en-GB');
+};
+
 const formatDate = (iso) => {
   if (!iso) return '—';
   try {
@@ -1239,7 +1248,7 @@ function renderDashboard() {
   el.innerHTML = `
     <div class="dash-kpis">
       <div class="dash-kpi dash-kpi--link" onclick="navigateTo('leads')" title="View all leads">
-        <div class="dash-kpi-value">${formatCurrency(pipelineValue, 'GBP')}</div>
+        <div class="dash-kpi-value">${formatCompact(pipelineValue, 'GBP')}</div>
         <div class="dash-kpi-label">Total Pipeline</div>
       </div>
       <div class="dash-kpi dash-kpi--link" onclick="navigateTo('leads')" title="View all leads">
