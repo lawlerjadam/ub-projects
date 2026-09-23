@@ -1283,3 +1283,36 @@ function renderIdeas() {
     });
   });
 }
+
+// ── FLOATING ACTION BUTTON ─────────────────────────────
+const fabMain = document.getElementById('fab-main');
+const fabMenu = document.getElementById('fab-menu');
+
+fabMain.addEventListener('click', () => {
+  const open = fabMenu.classList.toggle('open');
+  fabMain.classList.toggle('open', open);
+});
+
+// Close on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#fab-container')) {
+    fabMenu.classList.remove('open');
+    fabMain.classList.remove('open');
+  }
+});
+
+const fabActions = {
+  'fab-new-idea':     () => { document.querySelector('[data-section="ideas"]').click();     openModal('idea-modal'); },
+  'fab-new-lead':     () => { document.querySelector('[data-section="leads"]').click();     document.getElementById('new-lead-btn').click(); },
+  'fab-new-proposal': () => { document.querySelector('[data-section="proposals"]').click(); document.getElementById('new-proposal-btn').click(); },
+  'fab-new-client':   () => { document.querySelector('[data-section="clients"]').click();   document.getElementById('new-client-btn').click(); },
+  'fab-new-project':  () => { document.querySelector('[data-section="projects"]').click();  document.getElementById('new-project-btn').click(); },
+};
+
+Object.entries(fabActions).forEach(([id, fn]) => {
+  document.getElementById(id).addEventListener('click', () => {
+    fabMenu.classList.remove('open');
+    fabMain.classList.remove('open');
+    fn();
+  });
+});

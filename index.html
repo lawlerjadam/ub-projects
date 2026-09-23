@@ -49,8 +49,12 @@
         </div>
       </div>
 
-      <nav class="sidebar-nav">
-        <a href="#" class="nav-item active" data-section="leads">
+      <nav class="sidebar-nav">        <a href="#" class="nav-item active" data-section="ideas">
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.298.057-.592.123-.877a4 4 0 10-4.247 0c.066.285.108.579.123.877h4z"/></svg>
+          Ideas Park
+          <span class="nav-badge" id="ideas-count">0</span>
+        </a>
+        <a href="#" class="nav-item" data-section="leads">
           <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
           Leads
           <span class="nav-badge" id="leads-count">0</span>
@@ -70,11 +74,6 @@
           Projects
           <span class="nav-badge" id="projects-count">0</span>
         </a>
-        <a href="#" class="nav-item" data-section="ideas">
-          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.298.057-.592.123-.877a4 4 0 10-4.247 0c.066.285.108.579.123.877h4z"/></svg>
-          Ideas Park
-          <span class="nav-badge" id="ideas-count">0</span>
-        </a>
       </nav>
 
       <div class="sidebar-footer">
@@ -82,9 +81,6 @@
           <div class="user-avatar" id="user-avatar">U</div>
           <span class="user-email" id="user-email"></span>
         </div>
-        <button class="btn-icon sign-out-btn" id="sign-out-btn" title="Sign out">
-          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/></svg>
-        </button>
       </div>
     </aside>
 
@@ -92,7 +88,7 @@
     <main class="main">
 
       <!-- ── LEADS ─────────────────────────────── -->
-      <section id="section-leads" class="section active">
+      <section id="section-leads" class="section">
         <div class="section-header">
           <div>
             <h1 class="section-title">Leads</h1>
@@ -201,7 +197,7 @@
 
 
       <!-- ── IDEAS PARK ──────────────────────────── -->
-      <section id="section-ideas" class="section">
+      <section id="section-ideas" class="section active">
         <div class="section-header">
           <div>
             <h1 class="section-title">Ideas Park</h1>
@@ -723,6 +719,34 @@
         </div>
       </form>
     </div>
+  </div>
+
+
+  <!-- Floating Action Button -->
+  <div class="fab-container" id="fab-container">
+    <div class="fab-menu" id="fab-menu">
+      <div class="fab-menu-item" id="fab-new-idea">
+        <span class="fab-menu-label">New Idea</span>
+        <button class="fab-menu-btn">💡</button>
+      </div>
+      <div class="fab-menu-item" id="fab-new-lead">
+        <span class="fab-menu-label">New Lead</span>
+        <button class="fab-menu-btn">⭐</button>
+      </div>
+      <div class="fab-menu-item" id="fab-new-proposal">
+        <span class="fab-menu-label">New Proposal</span>
+        <button class="fab-menu-btn">📄</button>
+      </div>
+      <div class="fab-menu-item" id="fab-new-client">
+        <span class="fab-menu-label">New Client</span>
+        <button class="fab-menu-btn">🏢</button>
+      </div>
+      <div class="fab-menu-item" id="fab-new-project">
+        <span class="fab-menu-label">New Project</span>
+        <button class="fab-menu-btn">📅</button>
+      </div>
+    </div>
+    <button class="fab-main" id="fab-main" title="Quick add">+</button>
   </div>
 
 </body>
