@@ -321,8 +321,8 @@ html, body {
 }
 
 /* ── SECTIONS ─────────────────────────────────────── */
-.section { display: none; flex-direction: column; flex: 1; padding: 2rem; }
-.section.active { display: flex; }
+.section { display: none; flex-direction: column; flex: 1; padding: 2rem; width: 100%; box-sizing: border-box; }
+.section.active { display: flex; flex-direction: column; align-items: stretch; }
 
 .section-header {
   display: flex;
@@ -861,7 +861,6 @@ html, body {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1rem;
-  max-width: 1200px;
   width: 100%;
 }
 
