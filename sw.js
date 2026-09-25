@@ -1,4 +1,4 @@
-const CACHE = 'ub-projects-v33';
+const CACHE = 'ub-projects-v34';
 const ASSETS = ['/', '/index.html', '/styles.css?v=11', '/app.js?v=11', '/manifest.json', '/icon-192.png', '/icon-512.png', '/splash-750x1334.png', '/splash-1170x2532.png', '/splash-1179x2556.png', '/splash-1284x2778.png', '/splash-1290x2796.png'];
 
 self.addEventListener('install', e => {

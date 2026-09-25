@@ -401,12 +401,31 @@ async function loadData() {
     if (ideas)     DB.ideas     = ideas;
     if (tasks)     DB.tasks     = tasks.map(t => ({ ...t, type: t.type || t.task_type || 'Task' }));
 
-    // Seed if empty (first run)
-    if (!DB.leads.length)     DB.leads     = SEED.leads;
-    if (!DB.proposals.length) DB.proposals = SEED.proposals;
-    if (!DB.clients.length)   DB.clients   = SEED.clients;
-    if (!DB.contacts.length)  DB.contacts  = SEED.contacts;
-    if (!DB.projects.length)  DB.projects  = SEED.projects;
+    // Seed if empty (first run) — also persist seeds to Supabase so they survive reloads
+    const seedPromises = [];
+    if (!DB.leads.length) {
+      DB.leads = JSON.parse(JSON.stringify(SEED.leads));
+      seedPromises.push(...DB.leads.map(r => sb.from('leads').upsert(r)));
+    }
+    if (!DB.proposals.length) {
+      DB.proposals = JSON.parse(JSON.stringify(SEED.proposals));
+      seedPromises.push(...DB.proposals.map(r => sb.from('proposals').upsert(r)));
+    }
+    if (!DB.clients.length) {
+      DB.clients = JSON.parse(JSON.stringify(SEED.clients));
+      seedPromises.push(...DB.clients.map(r => sb.from('clients').upsert(r)));
+    }
+    if (!DB.contacts.length) {
+      DB.contacts = JSON.parse(JSON.stringify(SEED.contacts));
+      seedPromises.push(...DB.contacts.map(r => sb.from('contacts').upsert(r)));
+    }
+    if (!DB.projects.length) {
+      DB.projects = JSON.parse(JSON.stringify(SEED.projects));
+      seedPromises.push(...DB.projects.map(r => sb.from('projects').upsert(r)));
+    }
+    if (seedPromises.length) {
+      Promise.all(seedPromises).catch(e => console.warn('[Seed] Could not persist seed data to Supabase:', e.message));
+    }
 
   } catch (err) {
     // Supabase tables not yet created — use seed data
@@ -438,6 +457,62 @@ async function remove(table, id) {
     const { error } = await sb.from(table).delete().eq('id', id);
     if (error) console.warn('Supabase remove error:', error.message);
   } catch {}
+}
+
+// ── EXPORT / IMPORT ───────────────────────────────────
+function exportData() {
+  const snapshot = {
+    exported_at: new Date().toISOString(),
+    version: 1,
+    leads:     DB.leads,
+    proposals: DB.proposals,
+    clients:   DB.clients,
+    contacts:  DB.contacts,
+    projects:  DB.projects,
+    ideas:     DB.ideas,
+    tasks:     DB.tasks,
+  };
+  const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const ts   = new Date().toISOString().slice(0, 10);
+  a.href     = url;
+  a.download = `ub-projects-backup-${ts}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Backup exported ✓');
+}
+
+function importData() {
+  const input = document.createElement('input');
+  input.type  = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const snap = JSON.parse(text);
+      if (!snap.leads || !snap.projects) throw new Error('Unrecognised backup format');
+      if (!confirm(`Import backup from ${snap.exported_at ? snap.exported_at.slice(0, 10) : 'unknown date'}?\n\nThis will replace all current data.`)) return;
+
+      // Write to Supabase
+      const tables = { leads: snap.leads, proposals: snap.proposals, clients: snap.clients,
+                       contacts: snap.contacts, projects: snap.projects, ideas: snap.ideas || [], tasks: snap.tasks || [] };
+      for (const [table, rows] of Object.entries(tables)) {
+        if (!rows.length) continue;
+        // Delete existing rows then upsert
+        await sb.from(table).delete().neq('id', '__none__');
+        for (const row of rows) await sb.from(table).upsert(row);
+      }
+      // Reload
+      showToast('Import complete — reloading…');
+      setTimeout(() => location.reload(), 1200);
+    } catch (err) {
+      showToast('Import failed: ' + err.message, 'error');
+    }
+  };
+  input.click();
 }
 
 // ── NAVIGATION ─────────────────────────────────────────

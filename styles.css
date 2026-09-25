@@ -245,11 +245,38 @@ html, body {
 }
 
 .sidebar-footer {
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1rem 0.5rem;
   border-top: 1px solid rgba(255,255,255,0.12);
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 0.5rem;
+}
+
+.sidebar-data-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.sidebar-data-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  color: rgba(255,255,255,0.55);
+  font-size: 0.6875rem;
+  padding: 0.35rem 0.5rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.sidebar-data-btn:hover {
+  background: rgba(255,255,255,0.13);
+  color: rgba(255,255,255,0.9);
 }
 
 .user-info {
